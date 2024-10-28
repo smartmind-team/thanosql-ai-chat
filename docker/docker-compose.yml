@@ -1,0 +1,64 @@
+# Usage
+#   Start:          docker compose up
+#   Stop:           docker compose down
+
+name: thanosql-chat
+
+services:
+  app:
+    container_name: thanosql-chat-be
+    build: .
+    volumes:
+      - ../app:/app
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s # How often to run the check
+      timeout: 5s # Timeout for each attempt
+      retries: 3 # Number of attempts before marking as unhealthy
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      THANOSQL_API_TOKEN: ${THANOSQL_API_TOKEN}
+      THANOSQL_ENGINE_URL: ${THANOSQL_ENGINE_URL}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      PYTHONUNBUFFERED: 1
+
+  redis:
+    container_name: thanosql-chat-redis
+    build: redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: always
+    environment:
+      OPENAI_MODEL: ${OPENAI_MODEL}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL}
+      TEXT2SQL_MODEL: ${TEXT2SQL_MODEL}
+      TEXT2SQL_API_KEY: ${TEXT2SQL_API_KEY}
+      TEXT2SQL_BASE_URL: ${TEXT2SQL_BASE_URL}
+      MAX_TEMPERATURE: ${MAX_TEMPERATURE}
+      DEFAULT_TEMPERATURE: ${DEFAULT_TEMPERATURE}
+      SYSTEM_PROMPT: ${SYSTEM_PROMPT}
+    volumes:
+      - ./redis/data:/data
+
+  ngrok:
+    container_name: thanosql-chat-ngrok
+    image: ngrok/ngrok:latest
+    profiles: [deploy]
+    command:
+      - "http"
+      - "http://app:8000"
+    ports:
+      - ${NGROK_HTTP_PORT}:4040
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}

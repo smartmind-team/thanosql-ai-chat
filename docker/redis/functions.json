@@ -1,0 +1,14 @@
+[
+  {
+    "name": "stt",
+    "parameters": [
+      {
+        "name": "file_path",
+        "type": "TEXT"
+      }
+    ],
+    "return_type": "TEXT",
+    "description": "Speech-to-text given audio file_path.",
+    "example_usage": "SELECT stt(file_path) FROM table_name"
+  }
+]

@@ -1,0 +1,2 @@
+class StreamTerminated(Exception):
+    pass

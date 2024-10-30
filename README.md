@@ -12,8 +12,8 @@ This backend service powers the AI Chat functionality in ThanoSQL Workspace. It 
 
 2. Host your AI Chat backend service
 
-   > [!NOTE]
-   > You can either self-host the service using the instructions below or [Contact Us](https://smartmind.team/contact/) for managed hosting solutions.
+> [!NOTE]
+> You can either self-host the service using the instructions below or [Contact Us](https://smartmind.team/contact/) for managed hosting solutions.
 
 3. Configure the AI Chat:
    - Navigate to ThanoSQL's AI Chat > Chat Controls > General

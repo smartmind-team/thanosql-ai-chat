@@ -2,11 +2,11 @@
 #   Start:          docker compose up
 #   Stop:           docker compose down
 
-name: thanosql-chat
+name: thanosql-ai-chat
 
 services:
   app:
-    container_name: thanosql-chat-be
+    container_name: thanosql-ai-chat-be
     build: .
     volumes:
       - ../app:/app
@@ -27,7 +27,7 @@ services:
       PYTHONUNBUFFERED: 1
 
   redis:
-    container_name: thanosql-chat-redis
+    container_name: thanosql-ai-chat-redis
     build: redis
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -49,7 +49,7 @@ services:
       - ./redis/data:/data
 
   ngrok:
-    container_name: thanosql-chat-ngrok
+    container_name: thanosql-ai-chat-ngrok
     image: ngrok/ngrok:latest
     profiles: [deploy]
     command:

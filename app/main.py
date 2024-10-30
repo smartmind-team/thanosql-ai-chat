@@ -118,7 +118,7 @@ async def update_settings(request: ChatSettingsRequest):
 
 
 @app.get("/functions")
-async def get_fucntions():
+async def get_functions():
     try:
         functions = json.loads(redis_settings.get("functions"))
         return functions

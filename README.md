@@ -9,11 +9,15 @@ This backend service powers the AI Chat functionality in ThanoSQL Workspace. It 
 ## Getting Started
 
 1. First, set up a ThanoSQL Workspace ([Free Trial](https://console.thanosql.com/products/workspace/create_workspace))
-2. Configure the AI Chat:
+
+2. Host your AI Chat backend service
+
+   > [!NOTE]
+   > You can either self-host the service using the instructions below or [Contact Us](https://smartmind.team/contact/) for managed hosting solutions.
+
+3. Configure the AI Chat:
    - Navigate to ThanoSQL's AI Chat > Chat Controls > General
    - Enter your hosted API URL in the API URL field
-
-You can either self-host the service using the instructions below or [Contact Us](https://smartmind.team/contact/) for managed hosting solutions.
 
 ## Self-Hosting with Docker
 
@@ -39,7 +43,7 @@ cp .env.example .env
 # Configure environment variables
 # Make sure to set Secrets:
 # - ThanoSQL Workspace Engine URL
-# - API Token
+# - API Token, etc
 
 # Start services in detached mode
 docker compose up -d
@@ -62,7 +66,7 @@ curl --silent http://localhost:4040/api/tunnels | jq '.tunnels[0].public_url'
 Interactive API documentation is available through Swagger UI:
 
 - Local development: `http://127.0.0.1:8000/docs`
-- Ngrok deployment: `https://{ngrok-url}:8000/docs`
+- Ngrok deployment: `https://{ngrok-url}/docs`
 
 ## Function Definitions
 

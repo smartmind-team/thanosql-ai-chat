@@ -73,7 +73,6 @@ Interactive API documentation is available through Swagger UI:
 AI chat capabilities are defined through SQL functions. These functions are configured in the Redis component:
 
 - Function metadata and structure: [`functions.json`](docker/redis/functions.json)
-- SQL function implementations: [`functions.sql`](docker/redis/functions.sql)
 
 For detailed information about function configuration, implementation, and management, refer to the [Redis README](docker/redis/README.md).
 

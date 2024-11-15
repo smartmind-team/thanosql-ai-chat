@@ -156,6 +156,7 @@ def generate_and_execute_sql(
     LIMIT 1
     """
 
+    query_log = {}
     max_retries = settings.max_retries
     for _ in range(max_retries):
         try:

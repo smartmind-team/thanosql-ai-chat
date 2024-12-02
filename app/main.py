@@ -11,6 +11,7 @@ from fastapi.responses import StreamingResponse
 from openai import OpenAI
 from schema import ChatRequest, ChatSettingsRequest
 from settings import redis_settings, settings
+from feedback import FeedbackRequest, process_feedback
 from task import generate_chat_completion, generate_chat_title
 from util import pack_chat_control_response
 
@@ -143,3 +144,14 @@ async def test_chat():
     )
     response.headers["x-vercel-ai-data-stream"] = "v1"
     return response
+
+
+@app.post("/feedback")
+async def post_feedback(request: FeedbackRequest):
+    """
+    Handle feedback request by delegating to process_feedback function.
+    """
+    
+    print(request)
+    return process_feedback(request)
+

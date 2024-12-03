@@ -152,6 +152,5 @@ async def post_feedback(request: FeedbackRequest):
     Handle feedback request by delegating to process_feedback function.
     """
     
-    print(request)
     return process_feedback(request)
 

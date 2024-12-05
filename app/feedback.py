@@ -2,9 +2,11 @@ from typing import Dict
 from pydantic import BaseModel, Field
 from fastapi import HTTPException
 
+
 class FeedbackRequest(BaseModel):
-    # Feedback request model with required fields
-    id: str = Field(..., description="Unique identifier for the feedback")
+    # Feedback request model with updated fields
+    message_id: str = Field(..., description="Unique identifier for the feedback message")
+    session_id: str = Field(..., description="Unique identifier for the user session")
     feedback_status: str = Field(..., description="Must be 'like' or 'dislike'")
 
     @classmethod
@@ -26,4 +28,4 @@ def process_feedback(request: FeedbackRequest) -> Dict[str, str]:
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    return {"feedback_status": request.feedback_status}
+    return { "feedback_status": request.feedback_status }

@@ -33,6 +33,7 @@ llm = ChatOpenAI(
     max_tokens=None,
     timeout=None,
     max_retries=2,
+    api_key='sk-7hXELHYh5gZHtW7rA5A-h-RK6VbYykHtGbg87rFtKWT3BlbkFJ5bRF-BGffBWYjerh-IfMpSFp_htRmcaFYPPgzPw08A',
     # api_key='EMPTY',
     # openai_api_base = api_url,
     # streaming=True

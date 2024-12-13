@@ -15,9 +15,7 @@ class Table(BaseModel):
 
 
 class ChatRequest(BaseModel):
-    session_id: str
     messages: list[dict]
-    tag: str | None = None
     base_tables: list[Table] | None = None
     prompt_tables: list[Table] | None = None
 

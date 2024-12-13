@@ -1,33 +1,12 @@
 # Dockerfile for development purposes only
 # the --reload option should not be used in production because it makes the process very inefficient
 # CMD can be overriden using the docker-compose file
-# FROM tiangolo/uvicorn-gunicorn:python3.10
 
-FROM tiangolo/uvicorn-gunicorn:python3.11
-
-# FROM jupyter/base-notebook:python-3.11.3
-
-RUN apt-get update && apt-get install default-jdk ffmpeg libsm6 libxext6 libpq-dev gcc texlive-xetex texlive texlive-latex-extra pandoc -y
-RUN apt-get install git -y
-RUN apt-get update && apt-get install curl -y
-
-WORKDIR /usr/local/
-RUN mkdir /usr/local/sap
-
-WORKDIR /usr/local/sap
-
-COPY ./nwrfc750P_14-70002752.zip ./nwrfcsdk.zip
-RUN unzip nwrfcsdk.zip
-
-RUN rm nwrfcsdk.zip
-
-RUN touch /etc/ld.so.conf.d/nwrfcsdk.conf
-
-RUN echo "/usr/local/sap/nwrfcsdk/lib" >> /etc/ld.so.conf.d/nwrfcsdk.conf
-
-RUN apt-get install g++ -y
+FROM tiangolo/uvicorn-gunicorn:python3.10
 
 WORKDIR /app
+
+RUN apt-get update
 
 COPY requirements.txt .
 

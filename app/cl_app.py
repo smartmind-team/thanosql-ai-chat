@@ -5,7 +5,7 @@ from chainlit.input_widget import Select
 from client import OpenAIClientSingleton, thanosql_client
 from schema import Table
 from settings import redis_settings
-# from task import prepare_sql_messages, prepare_summary_messages
+from task import prepare_sql_messages, prepare_summary_messages
 from util import get_create_table_statement
 
 

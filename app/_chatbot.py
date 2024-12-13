@@ -20,7 +20,7 @@ from chat_schema import log_schema, chat_schema
 
 
 logger = logging.getLogger(__name__)
-# OPENAI_API_KEY
+# OPENAI KEY
 embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
 connection = "postgresql+psycopg://thanosql_user:thanosql@18.119.33.153:8821/default_database"
 api_url = "http://192.168.10.1:8827/v1"

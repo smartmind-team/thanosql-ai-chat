@@ -17,7 +17,7 @@ from dataclasses import dataclass
 import psycopg2
 
 logger = logging.getLogger(__name__)
-# OPENAI_API_KEY
+# OPENAI_KEY
 embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
 # client = ThanoSQL(
 #     api_token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ3b3Jrc3BhY2VfaWQiOjEsImV4cCI6OTIyMzM3MTk3NDcxOTE3OTAwMCwidG9rZW5faWQiOiI3MmI3Yjk1YXNmZTMzOTQyODlhMyJ9.QI_8riETPk7b3a8zGaiLckU4a9pSRzCcKxHI-pSvTUY",

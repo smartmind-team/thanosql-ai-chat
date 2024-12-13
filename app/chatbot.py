@@ -18,7 +18,7 @@ import psycopg2
 
 logger = logging.getLogger(__name__)
 
-os.environ["OPENAI_API_KEY"] = "sk-7hXELHYh5gZHtW7rA5A-h-RK6VbYykHtGbg87rFtKWT3BlbkFJ5bRF-BGffBWYjerh-IfMpSFp_htRmcaFYPPgzPw08A"
+os.environ["OPENAI_API_KEY"] =''
 embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
 # client = ThanoSQL(
 #     api_token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ3b3Jrc3BhY2VfaWQiOjEsImV4cCI6OTIyMzM3MTk3NDcxOTE3OTAwMCwidG9rZW5faWQiOiI3MmI3Yjk1YXNmZTMzOTQyODlhMyJ9.QI_8riETPk7b3a8zGaiLckU4a9pSRzCcKxHI-pSvTUY",
@@ -35,8 +35,7 @@ llm = ChatOpenAI(
     max_retries=2,
     # api_key='EMPTY',
     # openai_api_base = api_url,
-    # streaming=True,
-    api_key='sk-7hXELHYh5gZHtW7rA5A-h-RK6VbYykHtGbg87rFtKWT3BlbkFJ5bRF-BGffBWYjerh-IfMpSFp_htRmcaFYPPgzPw08A'
+    # streaming=True
 )
 
 # 단가표 설명 정보

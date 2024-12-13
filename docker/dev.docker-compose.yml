@@ -1,12 +1,14 @@
+name: thanosql-ai-chat-dev
+
 services:
   app:
-    container_name: thanosql-chat-be
+    container_name: thanosql-ai-chat-dev-be
     build: .
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - ../app:/app
     ports:
-      - "8000:8000"
+      - "8826:8000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s # How often to run the check
@@ -20,9 +22,10 @@ services:
       THANOSQL_ENGINE_URL: ${THANOSQL_ENGINE_URL}
       CORS_ORIGINS: ${CORS_ORIGINS}
       PYTHONUNBUFFERED: 1
+      SAPNWRFC_HOME: /usr/local/sap/nwrfcsdk
 
   redis:
-    container_name: thanosql-chat-redis
+    container_name: thanosql-ai-chat-dev-redis
     build: redis
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -44,7 +47,7 @@ services:
       - ./redis/data:/data
 
   ngrok:
-    container_name: thanosql-chat-ngrok
+    container_name: thanosql-ai-chat-ngrok
     image: ngrok/ngrok:latest
     profiles: [deploy]
     command:
@@ -57,3 +60,13 @@ services:
         condition: service_healthy
     environment:
       NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "192.168.20.0/24"
+          gateway: "192.168.20.1"

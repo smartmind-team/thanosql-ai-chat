@@ -8,11 +8,17 @@ from exception import StreamTerminated
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
 from schema import ChatRequest, ChatSettingsRequest
 from settings import redis_settings, settings
-from task import generate_chat_completion, generate_chat_title
+from feedback import FeedbackRequest, process_feedback
+from task import generate_chat_completion
 from util import pack_chat_control_response
+from chatbot import chatbot
+import logging
+
+logger = logging.getLogger("thanosql-ai-chat")
 
 app = FastAPI()
 
@@ -26,6 +32,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount("/data/이지원", StaticFiles(directory="data/이지원"), name="data/이지원")
+
 mount_chainlit(app=app, target="cl_app.py", path="/chainlit")
 
 
@@ -37,6 +45,7 @@ async def chat_stream(
     async def producer(generator):
         try:
             async for item in generator:
+                logger.info(f'item: {item}')
                 await queue.put(item)
             await queue.put(None)  # Signal completion
         except Exception as e:
@@ -47,9 +56,9 @@ async def chat_stream(
     try:
         # Task 1
         # Generate title of message(query)
-        title_task = asyncio.create_task(
-            producer(generate_chat_title(chat_request.messages, openai_client))
-        )
+        # title_task = asyncio.create_task(
+        #     producer(generate_chat_title(chat_request.messages, openai_client))
+        # )
 
         # Task 2
         # Generate SQL from message(Text-to-SQL) and execute SQL with ThanoSQL Client,
@@ -58,7 +67,7 @@ async def chat_stream(
             producer(generate_chat_completion(chat_request, openai_client))
         )
 
-        active_tasks = 2
+        active_tasks = 1
         while active_tasks > 0:
             item = await queue.get()
             if item is None:
@@ -67,11 +76,11 @@ async def chat_stream(
                 yield item
 
         # Wait for tasks to finish
-        await title_task
+        # await title_task
         await main_task
 
     except StreamTerminated:
-        title_task.cancel()
+        # title_task.cancel()
         main_task.cancel()
 
         # The stream has been terminated, we can stop here
@@ -133,7 +142,7 @@ async def test_chat():
         messages=[
             {"role": "user", "content": "Tell me a short joke about programming."},
         ],
-        model="gpt-3.5-turbo",
+        model="gpt-4o",
     )
 
     openai_client = OpenAIClientSingleton.get_sync_client()
@@ -143,3 +152,12 @@ async def test_chat():
     )
     response.headers["x-vercel-ai-data-stream"] = "v1"
     return response
+
+
+@app.post("/feedback")
+async def post_feedback(request: FeedbackRequest):
+    """
+    Handle feedback request by delegating to process_feedback function.
+    """
+    
+    return process_feedback(request)

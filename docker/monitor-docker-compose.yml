@@ -1,0 +1,97 @@
+services:
+  dcgm-exporter:
+    image: nvidia/dcgm-exporter
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    expose:
+      - 9400
+    restart: always
+    runtime: nvidia
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/config:/etc/prometheus
+      - ./prometheus/data:/prometheus
+    user: "65534:65534"
+    expose:
+      - 9090
+    command:
+      - '--storage.tsdb.path=/prometheus'
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    restart: always
+
+  loki:
+    image: grafana/loki:2.9.2
+    expose:
+      - 3100
+    restart: always
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
+    command: -config.file=/etc/loki/local-config.yaml
+
+  promtail:
+    image: grafana/promtail:2.9.2
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./promtail/config.yml:/etc/promtail/config.yml
+      - ./project-samoo-be/app/logs/:/var/log:ro
+      - ./project-samoo-be/logs/:/var/logs:ro
+    command: -config.file=/etc/promtail/config.yml
+    restart: always
+
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - 8828:3000
+    volumes:
+      - ./grafana/data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    restart: always
+    depends_on:
+      - prometheus
+    environment:
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_DATASOURCES_DISABLE_INTERNAL_LOGGING=true
+      - GF_DATASOURCES_LOKI_URL=
+      - GF_SERVER_ROOT_URL=http://localhost:8828/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    entrypoint:
+        /run.sh
+
+  node_exporter:
+    image: prom/node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    expose:
+      - 9100
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    expose:
+      - 8080

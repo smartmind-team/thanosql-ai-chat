@@ -13,9 +13,13 @@ from datetime import datetime
 from chat_schema import log_schema
 from log import insert_log
 import psycopg2
+from dotenv import load_dotenv
+
+load_dotenv()
+openai_api_key = os.getenv('OPENAI_API_KEY')
 
 logger = logging.getLogger(__name__)
-os.environ["OPENAI_API_KEY"] = "YOUR_API_KEY"
+os.environ["OPENAI_API_KEY"] = openai_api_key
 
 embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
 # client = ThanoSQL(
@@ -31,8 +35,7 @@ llm = ChatOpenAI(
     max_tokens=None,
     timeout=None,
     max_retries=2,
-    # api_key="YOUR_API_KEY",
-    api_key='EMPTY', # llama 용
+    # api_key=openai_api_key,
     openai_api_base = api_url,
     streaming=True,
 )
@@ -336,10 +339,12 @@ async def chatbot(request):
          # 이지원 전용 처리
         if tag == '이지원':
             result = collection_dict['이지원'].similarity_search(question, k=1)
-            yield f'0:{result[0].page_content} <img src={result[0].metadata["image_path"]}>'
-            yield f'8:{json.loads(log_object.model_dump_json())}'
+            easyone_result = f"{result[0].page_content} <img src={result[0].metadata['image_path']}>"
+            yield f'0:{json.dumps(easyone_result)}\n'
+            yield f'8:[{json.dumps(json.loads(log_object.model_dump_json()))}]\n'
             # {'annotations': [json.loads(log_object.model_dump_json())], 'content': result[0].page_content+'<img src="'+result[0].metadata['image_path']+'" alt="이지원 설명입니다">'}
-        
+        elif tag == '고객문의':
+            pass
         # No tag일 때,
         else:
             # 일상대화인지 확인
@@ -350,64 +355,64 @@ async def chatbot(request):
                 logger.info(f'response: {response}')
                 log_object.validate_intention = 'general'
                 log_object.validate_additional = 'no'
-                yield f'0:{response}'
-                yield f'8:{json.loads(log_object.model_dump_json())}'
+                yield f'0:{json.dumps(response)}\n'
+                yield f'8:[{json.dumps(json.loads(log_object.model_dump_json()))}]\n'
                 # {'content': response, 'annotations': [json.loads(log_object.model_dump_json())]}
             
-            history_list = ['']
-            # 새 질문인지 전 질문에 추가질문인지 확인
-            if len(request.messages) != 1:
-                for i in range(1,4):
-                    try:
-                        history_list.append(request.messages[i*(-2)-1]['id'])
-                    except:
-                        pass
-            log_object.history = history_list
-            # if len(history_list) > 0:
-            #     is_new_question = check_new_question(question, history_list)
-            
-            if tag:
-                group = tag
             else:
-                group = classify_question(question)
-            logger.info(f'group: {group}')
+                history_list = ['']
+                # 새 질문인지 전 질문에 추가질문인지 확인
+                if len(request.messages) != 1:
+                    for i in range(1,4):
+                        try:
+                            history_list.append(request.messages[i*(-2)-1]['id'])
+                        except:
+                            pass
+                log_object.history = history_list
+                # if len(history_list) > 0:
+                #     is_new_question = check_new_question(question, history_list)
+                
+                if tag:
+                    group = tag
+                else:
+                    group = classify_question(question)
+                logger.info(f'group: {group}')
 
-            # 참고 문서(VDB, RDB, RFC) 조회
-            references = []
-            # 요금문의일 때, 단가표 조회 여부 확인
-            if group == '요금문의':
-                response = ask_gasrate(question)
-                logger.info(f'need_gasrate: {response}')
-                if response != 'No':
-                    # 단가표 조회하는 쿼리 생성하고 조회
-                    rdb_connection = psycopg2.connect(host='18.119.33.153', dbname='default_database', user='thanosql_user', password='thanosql', port=8821)
-                    cursor = rdb_connection.cursor()
-                    cursor.execute(response[response.find('s'):-3])
-                    gasrate_info = cursor.fetchall()
-                    references.append({'source': 'RDB', 'raw_content': gasrate_info, 'content': gasrate_info})
-                    logger.info(f'query: {response}')
-                    cursor.close()
-                    log_object.validate_rdb = True
-                    log_object.query = response
-                    log_object.rdb = str(gasrate_info)
-                    # rdb_valid = evaluate_search(gasrate_info, question)
-                    # if rdb_valid == 'Yes':
-                    #     log_object.validate_rdb = True
-                    #     log_object.query = response
-                    #     log_object.rdb = gasrate_info
-                    # else:
-                    #     log_object.validate_rdb = False
-                    #     log_object.query = ''
-                    #     log_object.rdb = ''
+                # 참고 문서(VDB, RDB, RFC) 조회
+                references = []
+                # 요금문의일 때, 단가표 조회 여부 확인
+                if group == '요금문의':
+                    response = ask_gasrate(question)
+                    logger.info(f'need_gasrate: {response}')
+                    if response != 'No':
+                        # 단가표 조회하는 쿼리 생성하고 조회
+                        rdb_connection = psycopg2.connect(host='18.119.33.153', dbname='default_database', user='thanosql_user', password='thanosql', port=8821)
+                        cursor = rdb_connection.cursor()
+                        cursor.execute(response[response.find('s'):-3])
+                        gasrate_info = cursor.fetchall()
+                        references.append({'source': 'RDB', 'raw_content': gasrate_info, 'content': gasrate_info})
+                        logger.info(f'query: {response}')
+                        cursor.close()
+                        log_object.validate_rdb = True
+                        log_object.query = response
+                        log_object.rdb = str(gasrate_info)
+                        # rdb_valid = evaluate_search(gasrate_info, question)
+                        # if rdb_valid == 'Yes':
+                        #     log_object.validate_rdb = True
+                        #     log_object.query = response
+                        #     log_object.rdb = gasrate_info
+                        # else:
+                        #     log_object.validate_rdb = False
+                        #     log_object.query = ''
+                        #     log_object.rdb = ''
 
-            try:
                 # RFC 호출
                 rfc_info = extract_rfc_info(group)
-
                 # dfs = [rfc_function_info, rfc_input_info, rfc_output_info]
                 for dfs in rfc_info:
                     rfc_param = ask_need_rfc(dfs, question)
-                    
+                    yield f'0:{json.dumps("RFC 정보 추출 중입니다.")}\n'
+                    logger.info(f'rfc_param: {rfc_param}')
                     if rfc_param != 'No':
                         rfc_param = json.loads(rfc_param[rfc_param.find('{'):rfc_param.rfind('}')+1])                    
                         rfc_num = dfs[0]['Function Call No'].values[0][-2:]
@@ -427,51 +432,48 @@ async def chatbot(request):
                         except Exception as e:
                             logger.error(f'insert_log error: {e}')
                         
-                        yield f'0:{rfc_summary}'
-                        yield f'8:{json.loads(log_object.model_dump_json())}'
+                        yield f'0:{json.dumps(rfc_summary)}\n'
+                        yield f'8:[{json.dumps(json.loads(log_object.model_dump_json()))}]\n'
                         # return {'content': rfc_summary, 'annotations': [json.loads(log_object.model_dump_json())]}
-                        
-                        
-            except Exception:
-                logger.error('RFC : RFC data is not provided')
+                        raise StopAsyncIteration
+                yield f'0:{json.dumps("RAG 정보 추출 중입니다.")}\n'
+                # Vector DB에서 조회
+                retrieval_result = search_collection(question, group)
+                logger.info(f'retrieval_result: {retrieval_result}')
+                rag_answer = answer_by_rag(retrieval_result, question)
+                # rag_valid = evaluate_search(rag_answer, question)
+                references.append({'source': 'RAG', 'raw_content': retrieval_result, 'content': rag_answer, 'valid': True})
+                log_object.validate_rag = True
+                log_object.rag = retrieval_result
+                # else:
+                # if rag_valid == 'Yes':
+                #     log_object.validate_rag = True
+                #     log_object.rag = retrieval_result
+                # else:
+                #     log_object.validate_rag = False
+                #     log_object.rag = ''
 
-            # Vector DB에서 조회
-            retrieval_result = search_collection(question, group)
-            logger.info(f'retrieval_result: {retrieval_result}')
-            rag_answer = answer_by_rag(retrieval_result, question)
-            # rag_valid = evaluate_search(rag_answer, question)
-            references.append({'source': 'RAG', 'raw_content': retrieval_result, 'content': rag_answer, 'valid': True})
-            log_object.validate_rag = True
-            log_object.rag = retrieval_result
-            # else:
-            # if rag_valid == 'Yes':
-            #     log_object.validate_rag = True
-            #     log_object.rag = retrieval_result
-            # else:
-            #     log_object.validate_rag = False
-            #     log_object.rag = ''
-
-            answer_references = [f"{i['source']}: {i['content']}" for i in references]
-            logger.info(f'answer_references: {answer_references}')
-            answer_chain = chat_LLM(question, answer_references)
-            answer = ''
-            
-            async for event in answer_chain.astream_events({'today': datetime.now().strftime('%Y-%m-%d'), 'references': references, 'question': question}, version="v2"):
-                if event['event'] == 'on_chat_model_stream':
-                    answer += event['data']['chunk'].content
-                    yield f"0:{event['data']['chunk'].content}\n"
-            log_object.tag = group
-            log_object.response = answer
-            try:
-                insert_log(log_object)
-            except Exception as e:
-                logger.error(f'insert_log error: {e}')
-            yield f"8:{json.dumps(json.loads(log_object.model_dump_json()))}\n"
-            # return {'content': answer, 'annotations': [json.loads(log_object.model_dump_json())]}
+                answer_references = [f"{i['source']}: {i['content']}" for i in references]
+                logger.info(f'answer_references: {answer_references}')
+                answer_chain = chat_LLM(question, answer_references)
+                answer = ''
+                
+                async for event in answer_chain.astream_events({'today': datetime.now().strftime('%Y-%m-%d'), 'references': references, 'question': question}, version="v2"):
+                    if event['event'] == 'on_chat_model_stream':
+                        answer += event['data']['chunk'].content
+                        yield f"0:{json.dumps(event['data']['chunk'].content)}\n"
+                log_object.tag = group
+                log_object.response = answer
+                try:
+                    insert_log(log_object)
+                except Exception as e:
+                    logger.error(f'insert_log error: {e}')
+                yield f"8:[{json.dumps(json.loads(log_object.model_dump_json()))}]\n"
+                # return {'content': answer, 'annotations': [json.loads(log_object.model_dump_json())]}
                 
     except Exception as e:
         logger.error(f'chatbot error: {e}')
         
         yield f'0:Something went wrong in chatbot\n'
-        yield f'8:\n'
+        yield f'8:[]'
         # return {'content': 'Something went wrong in chatbot\n', 'annotations': []}

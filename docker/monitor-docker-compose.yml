@@ -18,7 +18,6 @@ services:
     volumes:
       - ./prometheus/config:/etc/prometheus
       - ./prometheus/data:/prometheus
-    user: "65534:65534"
     expose:
       - 9090
     command:

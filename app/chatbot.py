@@ -339,7 +339,8 @@ async def chatbot(request):
          # 이지원 전용 처리
         if tag == '이지원':
             result = collection_dict['이지원'].similarity_search(question, k=1)
-            easyone_result = f"{result[0].page_content} <img src={result[0].metadata['image_path']}>"
+            image_path = result[0].metadata['image_path']
+            easyone_result = f'{result[0].page_content} <img src="{image_path}" alt="이지원 설명입니다"/>'
             yield f'0:{json.dumps(easyone_result)}\n'
             yield f'8:[{json.dumps(json.loads(log_object.model_dump_json()))}]\n'
             # {'annotations': [json.loads(log_object.model_dump_json())], 'content': result[0].page_content+'<img src="'+result[0].metadata['image_path']+'" alt="이지원 설명입니다">'}

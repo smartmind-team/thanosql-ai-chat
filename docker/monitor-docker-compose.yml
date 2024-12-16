@@ -61,8 +61,8 @@ services:
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
       - GF_DATASOURCES_DISABLE_INTERNAL_LOGGING=true
       - GF_DATASOURCES_LOKI_URL=
-      - GF_SERVER_ROOT_URL=http://localhost:8828/grafana/ # root_url 설정
-      - GF_SERVER_SERVE_FROM_SUB_PATH=true  # serve_from_sub_path 설정
+        # - GF_SERVER_ROOT_URL=http://localhost:8828/grafana/
+        # - GF_SERVER_SERVE_FROM_SUB_PATH=true
     entrypoint:
         /run.sh
 

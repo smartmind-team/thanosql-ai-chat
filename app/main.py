@@ -14,8 +14,10 @@ from task import generate_chat_completion, generate_chat_title
 from util import pack_chat_control_response
 from chatbot import chatbot
 from feedback import process_feedback, FeedbackRequest
-app = FastAPI()
+from fastapi.staticfiles import StaticFiles
 
+app = FastAPI()
+app.mount("/data/이지원", StaticFiles(directory="data/이지원"), name="data/이지원")
 origins = settings.cors_origins.split(",") if settings.cors_origins else ["*"]
 
 app.add_middleware(

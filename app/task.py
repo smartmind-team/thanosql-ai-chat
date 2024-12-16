@@ -13,7 +13,7 @@ from prompt import (
 from schema import ChatRequest, StreamProtocolHandler, Table
 from settings import redis_settings, settings
 from util import get_create_table_statement, merge_list
-
+from chatbot import chatbot
 
 ############
 # Tasks
@@ -43,19 +43,21 @@ async def generate_chat_title(
 async def generate_chat_completion(
     chat_request: ChatRequest | None, openai_client
 ) -> AsyncGenerator[str, None]:
-    model_settings = redis_settings.get_all()
-    create_table_statement = prepare_table_statement(chat_request)
+    async for item in chatbot(chat_request):
+        yield item
+    # model_settings = redis_settings.get_all()
+    # create_table_statement = prepare_table_statement(chat_request)
 
-    if create_table_statement is None:
-        async for message in handle_regular_chat(
-            chat_request, openai_client, model_settings
-        ):
-            yield message
-    else:
-        async for message in handle_sql_chat(
-            chat_request, openai_client, model_settings, create_table_statement
-        ):
-            yield message
+    # if create_table_statement is None:
+    #     async for message in handle_regular_chat(
+    #         chat_request, openai_client, model_settings
+    #     ):
+    #         yield message
+    # else:
+    #     async for message in handle_sql_chat(
+    #         chat_request, openai_client, model_settings, create_table_statement
+    #     ):
+    #         yield message
 
 
 ############

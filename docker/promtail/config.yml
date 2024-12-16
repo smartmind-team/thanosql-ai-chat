@@ -1,0 +1,58 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+    external_labels:
+      host: docker
+
+scrape_configs:
+  - job_name: system
+    static_configs:
+    - targets:
+        - localhost
+      labels:
+        job: varlog
+        __path__: /var/log/*log
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2},\d{3})\s+-\s+(?P<task>\w+)\s+-\s+(?P<level>\w+)\s+-\s+(?P<message>.*)$'
+      - labels:
+          timestamp: timestamp
+          level: level
+          message: message
+
+  - job_name: system2
+    static_configs:
+    - targets:
+        - localhost
+      labels:
+        job: varlogs
+        __path__: /var/logs/*
+    pipeline_stages:
+      - regex:
+          expression: '(?P<message>.*)'  # 로그 라인의 전체 내용을 'message' 필드로 캡처
+      - labels:
+          message: message
+
+  - job_name: docker_logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: docker_logs
+          __path__: /var/lib/docker/containers/*/*-json.log
+    pipeline_stages:
+      - match:
+          selector: '{container_name=~"thanosql-ai-chat(-dev|)-(be|redis)"}'
+          stages:
+            - json:
+                expressions:
+                  log: log    # Docker JSON 로그의 "log" 필드
+                  stream: stream
+            - labels:
+                log_stream: stream

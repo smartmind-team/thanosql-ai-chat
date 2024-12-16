@@ -11,7 +11,7 @@ services:
     volumes:
       - ../app:/app
     ports:
-      - "8000:8000"
+      - "8826:8000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s # How often to run the check
@@ -25,6 +25,7 @@ services:
       THANOSQL_ENGINE_URL: ${THANOSQL_ENGINE_URL}
       CORS_ORIGINS: ${CORS_ORIGINS}
       PYTHONUNBUFFERED: 1
+      SAPNWRFC_HOME: /usr/local/sap/nwrfcsdk
 
   redis:
     container_name: thanosql-ai-chat-redis

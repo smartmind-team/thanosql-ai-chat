@@ -13,7 +13,7 @@ from schema import ChatRequest, ChatSettingsRequest
 from settings import redis_settings, settings
 from task import generate_chat_completion, generate_chat_title
 from util import pack_chat_control_response
-
+from chatbot import chatbot
 app = FastAPI()
 
 origins = settings.cors_origins.split(",") if settings.cors_origins else ["*"]
@@ -45,20 +45,10 @@ async def chat_stream(
             raise e  # Re-raise the exception to be caught in the main try block
 
     try:
-        # Task 1
-        # Generate title of message(query)
-        title_task = asyncio.create_task(
-            producer(generate_chat_title(chat_request.messages, openai_client))
-        )
-
-        # Task 2
-        # Generate SQL from message(Text-to-SQL) and execute SQL with ThanoSQL Client,
-        # then analyze Query Log from client and generate answer
         main_task = asyncio.create_task(
-            producer(generate_chat_completion(chat_request, openai_client))
+            producer(chatbot(chat_request))
         )
-
-        active_tasks = 2
+        active_tasks = 1
         while active_tasks > 0:
             item = await queue.get()
             if item is None:
@@ -66,16 +56,41 @@ async def chat_stream(
             else:
                 yield item
 
-        # Wait for tasks to finish
-        await title_task
-        await main_task
-
     except StreamTerminated:
-        title_task.cancel()
         main_task.cancel()
-
-        # The stream has been terminated, we can stop here
         return
+    # try:
+    #     # Task 1
+    #     # Generate title of message(query)
+    #     title_task = asyncio.create_task(
+    #         producer(generate_chat_title(chat_request.messages, openai_client))
+    #     )
+
+        # Task 2
+        # Generate SQL from message(Text-to-SQL) and execute SQL with ThanoSQL Client,
+        # then analyze Query Log from client and generate answer
+    #     main_task = asyncio.create_task(
+    #         producer(generate_chat_completion(chat_request, openai_client))
+    #     )
+
+    #     active_tasks = 2
+    #     while active_tasks > 0:
+    #         item = await queue.get()
+    #         if item is None:
+    #             active_tasks -= 1
+    #         else:
+    #             yield item
+
+    #     # Wait for tasks to finish
+    #     # await title_task
+    #     await main_task
+
+    # except StreamTerminated:
+    #     title_task.cancel()
+    #     main_task.cancel()
+
+    #     # The stream has been terminated, we can stop here
+    #     return
 
 
 @app.get("/health")
@@ -133,7 +148,7 @@ async def test_chat():
         messages=[
             {"role": "user", "content": "Tell me a short joke about programming."},
         ],
-        model="gpt-3.5-turbo",
+        model="gpt-4o",
     )
 
     openai_client = OpenAIClientSingleton.get_sync_client()

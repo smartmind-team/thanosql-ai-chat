@@ -1,0 +1,5 @@
+pipdeptree==2.24.0
+├── packaging [required: >=24.1, installed: 24.2]
+└── pip [required: >=24.2, installed: 24.2]
+setuptools==75.2.0
+wheel==0.44.0

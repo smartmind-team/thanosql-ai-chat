@@ -2,7 +2,6 @@ from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 from langchain_openai import ChatOpenAI
 from langchain_openai import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
-from langchain_core.documents import Document
 from langchain_postgres import PGVector
 from langchain_postgres.vectorstores import PGVector
 from pyrfc import Connection
@@ -13,11 +12,10 @@ import logging
 from datetime import datetime
 from chat_schema import log_schema
 from log import insert_log
-from dataclasses import dataclass
 import psycopg2
 
 logger = logging.getLogger(__name__)
-os.environ["OPENAI_API_KEY"] = "sk-7hXELHYh5gZHtW7rA5A-h-RK6VbYykHtGbg87rFtKWT3BlbkFJ5bRF-BGffBWYjerh-IfMpSFp_htRmcaFYPPgzPw08A"
+os.environ["OPENAI_API_KEY"] = "YOUR_API_KEY"
 
 embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
 # client = ThanoSQL(
@@ -27,16 +25,16 @@ embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
 connection = "postgresql+psycopg://thanosql_user:thanosql@18.119.33.153:8821/default_database"
 api_url = "http://192.168.10.1:8827/v1"
 llm = ChatOpenAI(
-    # model="/vllm-workspace/model/Linkbricks-Horizon-AI-Korean-llama-3.1-sft-dpo-8B",
-    model="gpt-4o",
+    model="/vllm-workspace/model/Linkbricks-Horizon-AI-Korean-llama-3.1-sft-dpo-8B",
+    # model="gpt-4o",
     temperature=0,
     max_tokens=None,
     timeout=None,
     max_retries=2,
-    api_key='sk-7hXELHYh5gZHtW7rA5A-h-RK6VbYykHtGbg87rFtKWT3BlbkFJ5bRF-BGffBWYjerh-IfMpSFp_htRmcaFYPPgzPw08A',
-    # api_key='EMPTY',
-    # openai_api_base = api_url,
-    # streaming=True
+    # api_key="YOUR_API_KEY",
+    api_key='EMPTY', # llama 용
+    openai_api_base = api_url,
+    streaming=True,
 )
 
 # 단가표 설명 정보
@@ -304,10 +302,10 @@ def chat_LLM(question, references):
     input_variables=['today', 'question', 'references'],
     )
     chain = chat_prompt | llm | StrOutputParser()
-    return chain.invoke({'today': datetime.now().strftime('%Y-%m-%d'), 'references': references, 'question': question})
+    # return chain.invoke({'today': datetime.now().strftime('%Y-%m-%d'), 'references': references, 'question': question})
+    return chain
 
-
-def chatbot(request):
+async def chatbot(request):
     try:
         logger.info(f'request: {request}')
         question = request.messages[-1]['content']
@@ -338,7 +336,9 @@ def chatbot(request):
          # 이지원 전용 처리
         if tag == '이지원':
             result = collection_dict['이지원'].similarity_search(question, k=1)
-            return {'annotations': [json.loads(log_object.model_dump_json())], 'content': result[0].page_content+'<img src="'+result[0].metadata['image_path']+'" alt="이지원 설명입니다">'}
+            yield f'0:{result[0].page_content} <img src={result[0].metadata["image_path"]}>'
+            yield f'8:{json.loads(log_object.model_dump_json())}'
+            # {'annotations': [json.loads(log_object.model_dump_json())], 'content': result[0].page_content+'<img src="'+result[0].metadata['image_path']+'" alt="이지원 설명입니다">'}
         
         # No tag일 때,
         else:
@@ -350,7 +350,9 @@ def chatbot(request):
                 logger.info(f'response: {response}')
                 log_object.validate_intention = 'general'
                 log_object.validate_additional = 'no'
-                return {'content': response, 'annotations': [json.loads(log_object.model_dump_json())]}
+                yield f'0:{response}'
+                yield f'8:{json.loads(log_object.model_dump_json())}'
+                # {'content': response, 'annotations': [json.loads(log_object.model_dump_json())]}
             
             history_list = ['']
             # 새 질문인지 전 질문에 추가질문인지 확인
@@ -424,7 +426,10 @@ def chatbot(request):
                             insert_log(log_object)
                         except Exception as e:
                             logger.error(f'insert_log error: {e}')
-                        return {'content': rfc_summary, 'annotations': [json.loads(log_object.model_dump_json())]}
+                        
+                        yield f'0:{rfc_summary}'
+                        yield f'8:{json.loads(log_object.model_dump_json())}'
+                        # return {'content': rfc_summary, 'annotations': [json.loads(log_object.model_dump_json())]}
                         
                         
             except Exception:
@@ -447,18 +452,26 @@ def chatbot(request):
             #     log_object.rag = ''
 
             answer_references = [f"{i['source']}: {i['content']}" for i in references]
-            logger.info(f'answer_references: {answer_references}')            
-            answer = chat_LLM(question, answer_references)
+            logger.info(f'answer_references: {answer_references}')
+            answer_chain = chat_LLM(question, answer_references)
+            answer = ''
+            
+            async for event in answer_chain.astream_events({'today': datetime.now().strftime('%Y-%m-%d'), 'references': references, 'question': question}, version="v2"):
+                if event['event'] == 'on_chat_model_stream':
+                    answer += event['data']['chunk'].content
+                    yield f"0:{event['data']['chunk'].content}\n"
             log_object.tag = group
             log_object.response = answer
-            # logger.info(f'answer: {answer}')
-            logger.info(f'answer: {answer}')
             try:
                 insert_log(log_object)
             except Exception as e:
                 logger.error(f'insert_log error: {e}')
-            return {'content': answer, 'annotations': [json.loads(log_object.model_dump_json())]}
+            yield f"8:{json.dumps(json.loads(log_object.model_dump_json()))}\n"
+            # return {'content': answer, 'annotations': [json.loads(log_object.model_dump_json())]}
                 
     except Exception as e:
         logger.error(f'chatbot error: {e}')
-        return {'content': 'Something went wrong in chatbot\n', 'annotations': []}
+        
+        yield f'0:Something went wrong in chatbot\n'
+        yield f'8:\n'
+        # return {'content': 'Something went wrong in chatbot\n', 'annotations': []}

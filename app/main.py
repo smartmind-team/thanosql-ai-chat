@@ -1,7 +1,6 @@
 import asyncio
 import json
 from typing import AsyncGenerator
-
 from chainlit.utils import mount_chainlit
 from client import OpenAIClientSingleton
 from exception import StreamTerminated
@@ -14,6 +13,7 @@ from settings import redis_settings, settings
 from task import generate_chat_completion, generate_chat_title
 from util import pack_chat_control_response
 from chatbot import chatbot
+from feedback import process_feedback, FeedbackRequest
 app = FastAPI()
 
 origins = settings.cors_origins.split(",") if settings.cors_origins else ["*"]
@@ -45,19 +45,10 @@ async def chat_stream(
             raise e  # Re-raise the exception to be caught in the main try block
 
     try:
-        main_task = asyncio.create_task(
-            producer(chatbot(chat_request))
-        )
-        active_tasks = 1
-        while active_tasks > 0:
-            item = await queue.get()
-            if item is None:
-                active_tasks -= 1
-            else:
-                yield item
+        async for item in chatbot(chat_request):
+            yield item
 
     except StreamTerminated:
-        main_task.cancel()
         return
     # try:
     #     # Task 1
@@ -158,3 +149,11 @@ async def test_chat():
     )
     response.headers["x-vercel-ai-data-stream"] = "v1"
     return response
+
+@app.post("/feedback")
+async def post_feedback(request: FeedbackRequest):
+    """
+    Handle feedback request by delegating to process_feedback function.
+    """
+    
+    return process_feedback(request)

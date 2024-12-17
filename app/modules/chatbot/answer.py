@@ -7,7 +7,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 
 from utils.logger import logger
-from resource import prompt
+from data import prompt
 
 
 class AnswerGenerator:

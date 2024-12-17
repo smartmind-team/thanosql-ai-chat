@@ -29,7 +29,7 @@ class Postgres:
     def test_connect(self) -> bool:
         # check the database could be connected
         try:
-            self.create_connect()
+            self.con = self.create_connect()
             return True
         except Exception as e:
             logger.error(e)

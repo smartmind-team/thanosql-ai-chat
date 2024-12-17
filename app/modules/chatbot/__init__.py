@@ -12,8 +12,6 @@ from modules.chatbot.question import QuestionAnalyzer
 from modules.chatbot.answer import AnswerGenerator
 from modules.chatbot.search import DataSearcher
 
-from log import insert_log
-
 
 llm = ChatOpenAI(
     model=settings.openai.model,
@@ -105,7 +103,7 @@ def chatbot(request):
             # 답변 생성
             answer = answer_generator.generate_answer(question, raw_references)
 
-            insert_log()
+            # insert_log()
 
             return {"annotations": [dict_front] if dict_front else [], "content": answer}
 

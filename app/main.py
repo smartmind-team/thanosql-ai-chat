@@ -18,5 +18,3 @@ app.include_router(router.default_router)
 app.include_router(router.settings_router)
 app.mount("/data/이지원", StaticFiles(directory="data/이지원"), name="data/이지원")
 logger.debug("Initialized FastAPI App")
-
-logger.debug("Initialized chainlit")

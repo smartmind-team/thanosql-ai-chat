@@ -12,7 +12,7 @@ services:
     ports:
       - "8826:8000"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:8000/health"]
       interval: 30s # How often to run the check
       timeout: 5s # Timeout for each attempt
       retries: 3 # Number of attempts before marking as unhealthy

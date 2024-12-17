@@ -4,10 +4,10 @@ from pathlib import Path
 from fastapi import APIRouter
 
 sys.path.append(Path(__file__).parents[3])
-from app.utils import settings
-from app.utils.logger import logger
-from app.models.schema import chat
-from app.router import router_utils
+from utils import settings
+from utils.logger import logger
+from models.schema import chat
+from router import router_utils
 
 settings_router = APIRouter(
     prefix="/settings",

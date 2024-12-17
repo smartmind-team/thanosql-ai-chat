@@ -6,15 +6,15 @@ from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
 sys.path.append(Path(__file__).parents[2])
-from app.utils import settings, pack_chat_control_response
-from app.utils.logger import logger
-from app.models.schema import chat, feedback
-from app.modules.client import OpenAIClientSingleton
-from app.modules.feedback import process_feedback
-from app.modules.chatbot.test import stream
+from utils import settings, pack_chat_control_response
+from utils.logger import logger
+from models.schema import chat, feedback
+from modules.client import OpenAIClientSingleton
+from modules.feedback import process_feedback
+from modules.chatbot.test import stream
 
-from app.router import router_utils
-from app.router.settings import settings_router
+from router import router_utils
+from router.settings import settings_router
 
 
 default_router = APIRouter()

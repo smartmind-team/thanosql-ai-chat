@@ -6,9 +6,9 @@ from typing import AsyncGenerator
 from openai import OpenAI
 
 sys.path.append(Path(__file__).parents[4])
-from app.utils.logger import logger
-from app.models import schema
-from app.models.exception import StreamTerminated
+from utils.logger import logger
+from models import schema
+from models.exception import StreamTerminated
 
 async def chat_stream(
     chat_request: schema.chat.ChatRequest, openai_client: OpenAI

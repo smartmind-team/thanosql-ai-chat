@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).parents[3]))
-from app.models import schema
+from models import schema
 
 
 create_log_query = """

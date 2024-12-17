@@ -2,9 +2,9 @@ import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).parents[1]))
-from app.models import schema
-from app.utils import settings
-from app.modules.client import thanosql_client
+from models import schema
+from utils import settings
+from modules.client import thanosql_client
 
 
 def get_tables_info_query(tables: list[schema.base.Table]):

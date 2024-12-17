@@ -5,9 +5,9 @@ from typing import Literal, Optional
 from pydantic import BaseModel
 
 sys.path.append(Path(__file__).parents[4])
-from app.utils import settings
-from app.models.schema import base
-from app.utils.logger import logger
+from utils import settings
+from models.schema import base
+from utils.logger import logger
 
 
 class ChatRequest(BaseModel):

@@ -4,9 +4,9 @@ from typing import AsyncGenerator
 from pathlib import Path
 
 sys.path.append(Path(__file__).parents[3])
-from app.utils import settings
-from app.models import schema
-from app.data import prompt
+from utils import settings
+from models import schema
+from data import prompt
 
 
 async def generate_chat_title(

@@ -5,9 +5,9 @@ from typing import Dict
 from fastapi import HTTPException
 
 sys.path.append(Path(__file__).parents[3])
-from app.utils.logger import logger
-from app.models.schema import feedback
-from app.modules.database import pg
+from utils.logger import logger
+from models.schema import feedback
+from modules.database import pg
 
 
 def process_feedback(request: feedback.FeedbackRequest) -> Dict[str, str]:

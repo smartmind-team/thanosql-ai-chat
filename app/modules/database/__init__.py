@@ -57,7 +57,8 @@ class Postgres:
             logger.error(e)
         finally:
             cursor.close()
-            self.con.close()
+            if self.con is not None:
+                self.con.close()
             self.con = None
 
     def _null_check(self, value):

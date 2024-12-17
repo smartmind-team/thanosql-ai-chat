@@ -1,17 +1,17 @@
 import sys
 import json
 from pathlib import Path
-from typing import Any, Callable, Optional, Union
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
 sys.path.append(Path(__file__).parents[2])
-from client import OpenAIClientSingleton
-from util import pack_chat_control_response
-from app.utils import settings
+from app.utils import settings, pack_chat_control_response
 from app.utils.logger import logger
 from app.models.schema import chat, feedback
+from app.modules.client import OpenAIClientSingleton
+from app.modules.feedback import process_feedback
+from app.modules.chatbot.test import stream
 
 from app.router import router_utils
 from app.router.settings import settings_router
@@ -49,10 +49,12 @@ async def get_functions():
 
     return await router_utils.exception_handler(_get_func)
 
+
 @default_router.post("/feedback")
 async def post_feedback(request: feedback.FeedbackRequest):
-    
+
     return await process_feedback(request)
+
 
 @default_router.get("/test-chat")
 async def test_chat():
@@ -67,7 +69,7 @@ async def test_chat():
     openai_client = OpenAIClientSingleton.get_sync_client()
 
     response = StreamingResponse(
-        chat_stream(chat_request, openai_client), media_type="text/event-stream"
+        stream.chat_stream(chat_request, openai_client), media_type="text/event-stream"
     )
     response.headers["x-vercel-ai-data-stream"] = "v1"
     return await response

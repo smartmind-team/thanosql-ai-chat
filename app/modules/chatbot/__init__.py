@@ -68,6 +68,7 @@ def chatbot(request):
             if len(request.messages) > i * 2
         ]
 
+        dict_front = None
         if not tags:
             groups = [question_analyzer.classify_question(question, collection_dict)]
         # 이지원 태그일 때
@@ -107,7 +108,7 @@ def chatbot(request):
 
             insert_log()
 
-            return {"annotations": [dict_front], "content": answer}
+            return {"annotations": [dict_front] if dict_front else [], "content": answer}
 
     except Exception as e:
         logger.error(f"chatbot error: {e}")

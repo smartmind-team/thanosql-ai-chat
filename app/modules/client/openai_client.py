@@ -1,16 +1,12 @@
+import sys
+from pathlib import Path
 from threading import Lock
 from typing import Optional
 
 from openai import AsyncOpenAI, OpenAI
-from thanosql import ThanoSQL
 
-from utils import settings
-
-# Initialize ThanoSQL Client
-thanosql_client = ThanoSQL(
-    api_token=settings.thanosql.api_token,
-    engine_url=settings.thanosql.engine_url
-)
+sys.path.append(Path(__file__).parents[3])
+from app.utils import settings
 
 
 class OpenAIClientSingleton:

@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install curl -y
 WORKDIR /usr/local/
 RUN mkdir /usr/local/sap
 WORKDIR /usr/local/sap
-COPY ./nwrfc750P_14-70002752.zip ./nwrfcsdk.zip
+COPY docker/nwrfc750P_14-70002752.zip ./nwrfcsdk.zip
 RUN unzip nwrfcsdk.zip
 
 RUN rm nwrfcsdk.zip
@@ -21,9 +21,18 @@ RUN echo "/usr/local/sap/nwrfcsdk/lib" >> /etc/ld.so.conf.d/nwrfcsdk.conf
 RUN apt-get install g++ -y
 WORKDIR /app
 
-COPY requirements.txt .
+# <-- pip -->
+# COPY requirements.txt .
 
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
+# RUN pip install --upgrade pip
+# RUN pip install --no-cache-dir --upgrade -r requirements.txt
+
+# <-- poetry -->
+COPY pyproject.toml .
+COPY poetry.lock .
+RUN pip install poetry
+RUN poetry install
+
+COPY ./app /app
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -243,8 +243,8 @@ pyrightconfig.json
 
 # Chainlit
 .files/
-app/.chainlit/*
-!app/.chainlit/config.toml
+**/.chainlit/*
+!**/.chainlit/config.toml
 
 # vscode
 .vscode/

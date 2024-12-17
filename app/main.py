@@ -1,7 +1,7 @@
 import asyncio
 from typing import AsyncGenerator
 from chainlit.utils import mount_chainlit
-from exception import StreamTerminated
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,9 +9,10 @@ from openai import OpenAI
 from task import generate_chat_completion, generate_chat_title
 
 import app.router as router
-from utils import settings
-from utils.logger import logger
-from models import schema
+from app.utils import settings
+from app.utils.logger import logger
+from app.models import schema
+from app.models.exception import StreamTerminated
 
 app = FastAPI()
 app.add_middleware(

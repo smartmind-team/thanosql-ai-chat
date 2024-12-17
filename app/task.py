@@ -8,10 +8,10 @@ from pglast.stream import IndentedStream
 
 sys.path.append(str(Path(__file__).parents[1]))
 from client import thanosql_client
-from exception import StreamTerminated
 from util import get_create_table_statement, merge_list
 from app.utils import settings
 from app.models import schema
+from app.models.exception import StreamTerminated
 from app.resource import prompt
 
 ############

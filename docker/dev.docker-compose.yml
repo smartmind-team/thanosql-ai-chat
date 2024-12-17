@@ -3,10 +3,12 @@ name: thanosql-ai-chat-dev
 services:
   app:
     container_name: thanosql-ai-chat-dev-be
-    build: .
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
-      - ../app:/app
+      - ./app:/app
     ports:
       - "8826:8000"
     healthcheck:
@@ -25,7 +27,9 @@ services:
 
   redis:
     container_name: thanosql-ai-chat-dev-redis
-    build: redis
+    build:
+      context: redis
+      dockerfile: Dockerfile
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s

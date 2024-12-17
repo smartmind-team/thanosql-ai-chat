@@ -52,9 +52,9 @@ def update_settings(request: chat.ChatSettingsRequest):
 
 @settings_router.get("/models")
 def get_models():
-    return router_utils.exception_handler({"models": settings.AppSetting.allowed_models})
+    return router_utils.exception_handler({"models": settings.app.allowed_models})
 
 
 @settings_router.get("/tags")
 def get_tags():
-    return router_utils.exception_handler({"tags": settings.AppSetting.system_tags})
+    return router_utils.exception_handler({"tags": settings.app.system_tags})

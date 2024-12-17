@@ -29,7 +29,7 @@ FILE_PATH = "data/"
 table_info = json.load(open(FILE_PATH + "chatbot/table_dict.json", "r"))
 
 # 유형그룹(GROUP) 11개
-class_group_list = settings.AppSetting.system_tags
+class_group_list = settings.app.system_tags
 
 # 컬렉션 사전
 collection_dict = dict()

@@ -3,7 +3,7 @@ from pathlib import Path
 
 from thanosql import ThanoSQL
 
-sys.path.append(str(Path(__file__).parents[3]))
+(str(Path(__file__).parents[3]))
 from utils import settings
 
 thanosql_client = ThanoSQL(

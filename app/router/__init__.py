@@ -5,7 +5,7 @@ from pathlib import Path
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
-sys.path.append(Path(__file__).parents[2])
+(Path(__file__).parents[2])
 from utils import settings, pack_chat_control_response
 from utils.logger import logger
 from models.schema import chat, feedback

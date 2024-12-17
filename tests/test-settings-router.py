@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-sys.path.append(str(Path(__file__).parents[1]))
+(str(Path(__file__).parents[1]))
 from main import app
 from utils.logger import logger
 from router import settings_router

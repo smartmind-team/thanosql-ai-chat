@@ -6,7 +6,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 
-sys.path.append(Path(__file__).parents[1])
+(Path(__file__).parents[1])
 from utils.logger import logger
 from resource import prompt
 

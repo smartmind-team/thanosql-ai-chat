@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).parents[1]))
+(str(Path(__file__).parents[1]))
 from models import schema
 from utils import settings
 from modules.client import thanosql_client

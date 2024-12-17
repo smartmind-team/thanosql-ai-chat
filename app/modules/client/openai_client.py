@@ -5,7 +5,7 @@ from typing import Optional
 
 from openai import AsyncOpenAI, OpenAI
 
-sys.path.append(Path(__file__).parents[3])
+(Path(__file__).parents[3])
 from utils import settings
 
 

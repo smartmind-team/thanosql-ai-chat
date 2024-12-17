@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-sys.path.append(str(Path(__file__).parents[1]))
+(str(Path(__file__).parents[1]))
 from utils.logger import logger
 from modules.database import Postgres
 

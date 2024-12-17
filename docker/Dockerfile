@@ -5,7 +5,6 @@
 
 FROM tiangolo/uvicorn-gunicorn:python3.11
 
-# FROM jupyter/base-notebook:python-3.11.3
 RUN apt-get update && apt-get install default-jdk ffmpeg libsm6 libxext6 libpq-dev gcc texlive-xetex texlive texlive-latex-extra pandoc -y
 RUN apt-get install git -y
 RUN apt-get update && apt-get install curl -y
@@ -31,7 +30,8 @@ WORKDIR /app
 COPY pyproject.toml .
 COPY poetry.lock .
 RUN pip install poetry
-RUN poetry install
+RUN poetry config virtualenvs.create false
+RUN poetry install --no-interaction --no-ansi
 
 COPY ./app /app
 

@@ -1,9 +1,13 @@
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).parents[1]))
 from client import thanosql_client
-from schema import ChatSettingsResponse, Table
-from settings import redis_settings
+from app.utils import settings
+from app.models import schema
 
 
-def get_tables_info_query(tables: list[Table]):
+def get_tables_info_query(tables: list[schema.base.Table]):
     # Generate the SQL query to get column details for all specified tables
     queries = []
     for table in tables:
@@ -48,7 +52,7 @@ def generate_create_table_statement(table_schema, table_name, columns):
     return create_table_sql
 
 
-def get_create_table_statement(table_list: list[Table]) -> str:
+def get_create_table_statement(table_list: list[schema.base.Table]) -> str:
     table_columns = {}
     table_info_query = get_tables_info_query(table_list)
     table_info_list = thanosql_client.query.execute(table_info_query).records.data
@@ -110,7 +114,7 @@ def mask_string(s: str) -> str:
 
 
 # Retrieve chat control settings from Redis and pack into model
-def pack_chat_control_response() -> ChatSettingsResponse:
+def pack_chat_control_response() -> schema.chat.ChatSettingsResponse:
     # Define the fields that need to be fetched from Redis
     field_names = [
         "openai_model",
@@ -126,10 +130,10 @@ def pack_chat_control_response() -> ChatSettingsResponse:
 
     # Use a dictionary comprehension to fetch values from Redis
     settings = {
-        field: mask_string(redis_settings.get(field))
+        field: mask_string(settings.redis.get(field))
         if "api_key" in field
-        else (redis_settings.get(field) or "")
+        else (settings.redis.get(field) or "")
         for field in field_names
     }
 
-    return ChatSettingsResponse(**settings)
+    return schema.chat.ChatSettingsResponse(**settings)

@@ -3,10 +3,11 @@ import json
 import chainlit as cl
 from chainlit.input_widget import Select
 from client import OpenAIClientSingleton, thanosql_client
-from schema import Table
-from settings import redis_settings
 from task import prepare_sql_messages, prepare_summary_messages
 from util import get_create_table_statement
+
+from models.schema.base import Table
+from utils.settings import redis
 
 
 @cl.on_chat_start
@@ -32,7 +33,7 @@ async def start():
 
 @cl.on_settings_update
 async def setup_agent(settings):
-    redis_settings.set("openai_model", settings["Model"])
+    redis.set("openai_model", settings["Model"])
 
 
 @cl.step(type="tool")
@@ -42,7 +43,7 @@ async def gen_query(human_query: str):
     current_step.show_input = False
 
     openai_client = OpenAIClientSingleton.get_async_client()
-    model_settings = redis_settings.get_all()
+    model_settings = redis.get_all()
 
     udf_list = json.loads(model_settings.get("functions"))
     # TODO : create table list from UI
@@ -93,7 +94,7 @@ async def execute_query(query):
 @cl.step(type="tool")
 async def analyze(query_log, human_query):
     openai_client = OpenAIClientSingleton.get_async_client()
-    model_settings = redis_settings.get_all()
+    model_settings = redis.get_all()
 
     current_step = cl.context.current_step
     current_step.name = "Analyze Query Log"

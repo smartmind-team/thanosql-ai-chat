@@ -17,10 +17,9 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+    env_file:
+      - .env
     environment:
-      THANOSQL_API_TOKEN: ${THANOSQL_API_TOKEN}
-      THANOSQL_ENGINE_URL: ${THANOSQL_ENGINE_URL}
-      CORS_ORIGINS: ${CORS_ORIGINS}
       PYTHONUNBUFFERED: 1
       SAPNWRFC_HOME: /usr/local/sap/nwrfcsdk
 
@@ -40,9 +39,9 @@ services:
       TEXT2SQL_MODEL: ${TEXT2SQL_MODEL}
       TEXT2SQL_API_KEY: ${TEXT2SQL_API_KEY}
       TEXT2SQL_BASE_URL: ${TEXT2SQL_BASE_URL}
-      MAX_TEMPERATURE: ${MAX_TEMPERATURE}
-      DEFAULT_TEMPERATURE: ${DEFAULT_TEMPERATURE}
-      SYSTEM_PROMPT: ${SYSTEM_PROMPT}
+      MAX_TEMPERATURE: ${APP_MAX_TEMPERATURE}
+      DEFAULT_TEMPERATURE: ${APP_DEFAULT_TEMPERATURE}
+      SYSTEM_PROMPT: ${APP_SYSTEM_PROMPT}
     volumes:
       - ./redis/data:/data
 
@@ -61,12 +60,11 @@ services:
     environment:
       NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
 
-
 networks:
   default:
     driver: bridge
     ipam:
       driver: default
       config:
-        - subnet: "192.168.20.0/24"
-          gateway: "192.168.20.1"
+        - subnet: "192.168.0.0/24"
+          gateway: "192.168.0.1"

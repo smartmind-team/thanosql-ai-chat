@@ -1,19 +1,18 @@
+import sys
 import json
+from pathlib import Path
 from typing import Any, AsyncGenerator, Dict, List
 
-from client import thanosql_client
-from exception import StreamTerminated
 from pglast import parse_sql
 from pglast.stream import IndentedStream
-from prompt import (
-    system_prompt_generate_query_result_summary,
-    system_prompt_generate_sql,
-    user_prompt_generate_message_title,
-)
-from schema import ChatRequest, StreamProtocolHandler, Table
-from settings import redis_settings, settings
+
+sys.path.append(str(Path(__file__).parents[1]))
+from client import thanosql_client
+from exception import StreamTerminated
 from util import get_create_table_statement, merge_list
-from chatbot import chatbot
+from app.utils import settings
+from app.models import schema
+from app.resource import prompt
 
 ############
 # Tasks
@@ -21,12 +20,12 @@ from chatbot import chatbot
 async def generate_chat_title(
     messages: list[dict], openai_client
 ) -> AsyncGenerator[str, None]:
-    model = redis_settings.get("openai_model")
+    model = settings.redis.get("openai_model")
     question = messages[-1]["content"]
     current_messages = [
         {
             "role": "user",
-            "content": user_prompt_generate_message_title.format(question=question),
+            "content": prompt.user_prompt_generate_message_title.format(question=question),
         }
     ]
     try:
@@ -37,15 +36,15 @@ async def generate_chat_title(
     except Exception:
         # If creation fails, only first 30 characters of the question are returned.
         title = question[:30]
-    yield StreamProtocolHandler.yield_annotation(title, "title")
+    yield schema.base.StreamProtocolHandler.yield_annotation(title, "title")
 
 
 async def generate_chat_completion(
-    chat_request: ChatRequest | None, openai_client
+    chat_request: schema.chat.ChatRequest | None, openai_client
 ) -> AsyncGenerator[str, None]:
     async for item in chatbot(chat_request):
         yield item
-    # model_settings = redis_settings.get_all()
+    # model_settings = settings.redis.get_all()
     # create_table_statement = prepare_table_statement(chat_request)
 
     # if create_table_statement is None:
@@ -64,7 +63,7 @@ async def generate_chat_completion(
 # Utils
 ############
 async def handle_regular_chat(
-    chat_request: ChatRequest, openai_client, model_settings: Dict[str, Any]
+    chat_request: schema.chat.ChatRequest, openai_client, model_settings: Dict[str, Any]
 ) -> AsyncGenerator[str, None]:
     messages = prepare_messages(
         chat_request.messages, model_settings.get("system_prompt")
@@ -75,13 +74,13 @@ async def handle_regular_chat(
         ):
             yield chunk
     except Exception as e:
-        yield StreamProtocolHandler.yield_error(e)
-        yield StreamProtocolHandler.yield_finish_message("error")
+        yield schema.base.StreamProtocolHandler.yield_error(e)
+        yield schema.base.StreamProtocolHandler.yield_finish_message("error")
         raise StreamTerminated()
 
 
 async def handle_sql_chat(
-    chat_request: ChatRequest,
+    chat_request: schema.chat.ChatRequest,
     openai_client,
     model_settings: Dict[str, Any],
     create_table_statement: str,
@@ -92,7 +91,7 @@ async def handle_sql_chat(
 
     try:
         query_log = generate_and_execute_sql(sql_messages, model_settings)
-        yield StreamProtocolHandler.yield_annotation(
+        yield schema.base.StreamProtocolHandler.yield_annotation(
             data=query_log, annotation="query_log"
         )
 
@@ -102,14 +101,14 @@ async def handle_sql_chat(
         ):
             yield chunk
     except Exception as e:
-        yield StreamProtocolHandler.yield_error(e)
-        yield StreamProtocolHandler.yield_finish_message("error")
+        yield schema.base.StreamProtocolHandler.yield_error(e)
+        yield schema.base.StreamProtocolHandler.yield_finish_message("error")
         raise StreamTerminated()
 
 
-def prepare_table_statement(chat_request: ChatRequest) -> str | None:
+def prepare_table_statement(chat_request: schema.chat.ChatRequest) -> str | None:
     if chat_request.base_tables or chat_request.prompt_tables:
-        table_list: list[Table] = merge_list(
+        table_list: list[schema.base.Table] = merge_list(
             chat_request.base_tables, chat_request.prompt_tables
         )
         if table_list:
@@ -131,7 +130,7 @@ def prepare_sql_messages(
     return [
         {
             "role": "system",
-            "content": system_prompt_generate_sql.format(
+            "content": prompt.system_prompt_generate_sql.format(
                 create_table_statement=create_table_statement, udf_list=udf_list
             ),
         },
@@ -190,7 +189,7 @@ def prepare_summary_messages(
     return [
         {
             "role": "system",
-            "content": system_prompt_generate_query_result_summary.format(
+            "content": prompt.system_prompt_generate_query_result_summary.format(
                 system_prompt=model_settings.get("system_prompt"),
                 query_log=str(query_log),
             ),
@@ -211,4 +210,4 @@ async def stream_openai_response(
     for chunk in response:
         payload = chunk.choices[0].delta.content
         if payload and isinstance(payload, str):
-            yield StreamProtocolHandler.yield_content(payload)
+            yield schema.base.StreamProtocolHandler.yield_content(payload)

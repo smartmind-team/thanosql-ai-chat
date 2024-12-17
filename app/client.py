@@ -2,12 +2,14 @@ from threading import Lock
 from typing import Optional
 
 from openai import AsyncOpenAI, OpenAI
-from settings import redis_settings, settings
 from thanosql import ThanoSQL
+
+from utils import settings
 
 # Initialize ThanoSQL Client
 thanosql_client = ThanoSQL(
-    api_token=settings.thanosql_api_token, engine_url=settings.thaonsql_engine_url
+    api_token=settings.thanosql.api_token,
+    engine_url=settings.thanosql.engine_url
 )
 
 
@@ -30,8 +32,8 @@ class OpenAIClientSingleton:
     def _initialize(self):
         """Initialize Redis connection and OpenAI clients with settings from Redis"""
         # Get OpenAI settings from Redis
-        self._current_api_key = redis_settings.get("openai_api_key")
-        self._current_base_url = redis_settings.get("openai_base_url")
+        self._current_api_key = settings.redis.get("openai_api_key")
+        self._current_base_url = settings.redis.get("openai_base_url")
 
         if not self._current_api_key or not self._current_base_url:
             raise ValueError("Required OpenAI settings not found in Redis")
@@ -51,8 +53,8 @@ class OpenAIClientSingleton:
     def refresh_clients(self) -> None:
         """Refresh clients with latest Redis settings if they've changed"""
         with self._lock:
-            new_api_key = redis_settings.get("openai_api_key")
-            new_base_url = redis_settings.get("openai_base_url")
+            new_api_key = settings.redis.get("openai_api_key")
+            new_base_url = settings.redis.get("openai_base_url")
 
             if (
                 new_api_key != self._current_api_key

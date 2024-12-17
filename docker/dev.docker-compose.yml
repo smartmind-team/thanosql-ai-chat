@@ -23,7 +23,6 @@ services:
       - .env
     environment:
       PYTHONUNBUFFERED: 1
-      SAPNWRFC_HOME: /usr/local/sap/nwrfcsdk
 
   redis:
     container_name: thanosql-ai-chat-dev-redis

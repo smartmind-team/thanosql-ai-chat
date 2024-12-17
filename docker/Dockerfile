@@ -20,6 +20,7 @@ RUN echo "/usr/local/sap/nwrfcsdk/lib" >> /etc/ld.so.conf.d/nwrfcsdk.conf
 RUN apt-get install g++ -y
 RUN echo "/usr/local/sap/nwrfcsdk/lib" > /etc/ld.so.conf.d/sap.conf
 RUN ldconfig
+RUN export SAPNWRFC_HOME="/usr/local/sap/nwrfcsdk"
 
 WORKDIR /app
 

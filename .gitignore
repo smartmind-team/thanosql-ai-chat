@@ -253,7 +253,7 @@ pyrightconfig.json
 *.zip
 
 # redis
-*.rdb
+**/redis/data/*
 
 # docker
 docker/grafana/data/*

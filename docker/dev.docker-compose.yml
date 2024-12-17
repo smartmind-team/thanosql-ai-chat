@@ -64,11 +64,11 @@ services:
     environment:
       NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
 
-networks:
-  default:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: "192.168.20.0/24"
-          gateway: "192.168.20.1"
+# networks:
+#   default:
+#     driver: bridge
+#     ipam:
+#       driver: default
+#       config:
+#         - subnet: "192.168.20.0/24"
+#           gateway: "192.168.20.1"

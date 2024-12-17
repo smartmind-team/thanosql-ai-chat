@@ -5,7 +5,6 @@ from typing import AsyncGenerator
 
 from openai import OpenAI
 
-(Path(__file__).parents[4])
 from utils.logger import logger
 from models import schema
 from models.exception import StreamTerminated

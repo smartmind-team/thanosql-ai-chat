@@ -3,7 +3,6 @@ import asyncio
 from typing import AsyncGenerator
 from pathlib import Path
 
-(Path(__file__).parents[3])
 from utils import settings
 from models import schema
 from data import prompt

@@ -4,7 +4,6 @@ from typing import Any, Callable, Optional, Union
 
 from fastapi import HTTPException
 
-(Path(__file__).parents[2])
 from utils.logger import logger
 
 async def exception_handler(

@@ -5,7 +5,6 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 
-(Path(__file__).parents[3])
 from utils.logger import logger
 from utils import settings
 from resource import prompt

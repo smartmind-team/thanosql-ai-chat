@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Literal, Optional
 from pydantic import BaseModel
 
-(Path(__file__).parents[4])
 from utils import settings
 from models.schema import base
 from utils.logger import logger

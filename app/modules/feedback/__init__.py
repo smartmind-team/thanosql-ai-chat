@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Dict
 from fastapi import HTTPException
 
-(Path(__file__).parents[3])
 from utils.logger import logger
 from models.schema import feedback
 from modules.database import pg

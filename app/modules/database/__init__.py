@@ -6,7 +6,6 @@ import psycopg2
 from psycopg2._psycopg import connection
 from langchain_postgres.vectorstores import PGVector
 
-(Path(__file__).parents[4])
 from utils.settings import db
 from utils.logger import logger
 

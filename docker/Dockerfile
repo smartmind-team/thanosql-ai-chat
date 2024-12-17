@@ -19,7 +19,7 @@ RUN touch /etc/ld.so.conf.d/nwrfcsdk.conf
 RUN echo "/usr/local/sap/nwrfcsdk/lib" >> /etc/ld.so.conf.d/nwrfcsdk.conf
 RUN apt-get install g++ -y
 RUN echo "/usr/local/sap/nwrfcsdk/lib" > /etc/ld.so.conf.d/sap.conf
-# RUN ldconfig
+RUN ldconfig
 
 WORKDIR /app
 
@@ -33,7 +33,7 @@ WORKDIR /app
 COPY pyproject.toml .
 COPY poetry.lock .
 RUN pip install poetry
-# RUN pip install pyrfc==2.8.3
+RUN pip install pyrfc==2.8.3
 RUN poetry config virtualenvs.create false
 RUN poetry install --no-interaction --no-ansi
 

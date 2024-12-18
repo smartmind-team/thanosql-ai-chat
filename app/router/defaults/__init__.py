@@ -7,9 +7,10 @@ from router import router_utils
 from utils import settings, pack_chat_control_response
 from utils.logger import logger
 from models.schema import chat, feedback
+from modules import chatbot
+# from modules.chatbot.test import stream
 from modules.client import OpenAIClientSingleton
 from modules.feedback import process_feedback
-from modules.chatbot.test import stream
 
 default_router = APIRouter()
 
@@ -35,9 +36,10 @@ async def post_feedback(request: feedback.FeedbackRequest):
 @default_router.post("/chat")
 async def post_chat(request: chat.ChatRequest):
     openai_client = OpenAIClientSingleton.get_sync_client()
-    response = StreamingResponse(
-        stream.chat_stream(request, openai_client), media_type="text/event-stream"
-    )
+    # response = StreamingResponse(
+    #     stream.(request, openai_client), media_type="text/event-stream"
+    # )
+    response = chatbot.chatbot(request)
     response.headers["x-vercel-ai-data-stream"] = "v1"
     return response
 

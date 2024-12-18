@@ -41,12 +41,12 @@ for name in class_group_list:
 collection_dict["공급규정"] = pg.load_vector(embeddings, "공급규정")
 collection_dict["이지원"] = pg.load_vector(embeddings, "이지원")
 collection_dict["QC"] = pg.load_vector(embeddings, "QC")
-log_msg = "Collection Dict keys:"
-for key in collection_dict.keys():
-    log_msg += f"\n   - {key}"
-logger.debug(log_msg)
 
 async def chatbot(request: schema.chat.ChatRequest):
+    log_msg = "Collection Dict keys:"
+    for key in collection_dict.keys():
+        log_msg += f"\n   - {key}"
+    logger.debug(log_msg)
     try:
         logger.debug("Start chatbot process")
         question = request.messages[-1]["content"]
@@ -138,11 +138,11 @@ async def chatbot(request: schema.chat.ChatRequest):
                     raise StopAsyncIteration
 
             yield f'0:{json.dumps("RAG 정보 추출 중입니다.")}\n'
-            retrieval_result = await data_searcher.search_collection(
+            retrieval_result = data_searcher.search_collection(
                 question, collection_name=group
             )
             logger.info(f"Retrieval Result: {retrieval_result}")
-            rag_answer = await answer_generator.answer_by_rag(retrieval_result)
+            rag_answer = answer_generator.answer_by_rag(retrieval_result)
             references.append(
                 {
                     "source": "RAG",
@@ -156,8 +156,7 @@ async def chatbot(request: schema.chat.ChatRequest):
 
             answer_references = [f"{i['source']}: {i['content']}" for i in references]
             logger.info(f"answer_references: {answer_references}")
-            # answer_chain = chat_LLM(question, answer_references)
-            answer_chain = await answer_generator.generate_answer(references)
+            answer_chain = answer_generator.get_answer_chain(references)
             answer = ""
 
             async for event in answer_chain.astream_events(

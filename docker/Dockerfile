@@ -24,13 +24,6 @@ ENV SAPNWRFC_HOME="/usr/local/sap/nwrfcsdk"
 
 WORKDIR /app
 
-# <-- pip -->
-# COPY requirements.txt .
-
-# RUN pip install --upgrade pip
-# RUN pip install --no-cache-dir --upgrade -r requirements.txt
-
-# <-- poetry -->
 COPY pyproject.toml .
 COPY poetry.lock .
 RUN pip install poetry

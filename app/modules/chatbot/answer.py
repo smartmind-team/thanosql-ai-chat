@@ -75,17 +75,16 @@ class AnswerGenerator:
         chain = chat_prompt | self.llm | JsonOutputParser()
         return chain.invoke({"question": self.question, "response": response})
 
-    async def generate_answer(self, references: list) -> str:
+    def generate_answer(self, references: list) -> str:
         chat_prompt = PromptTemplate(template=prompt.answer_prompt)
         chain = chat_prompt | self.llm | StrOutputParser()
-        async for event in chain.astream_events(
-            {
-                "today": datetime.now().strftime("%Y-%m-%d"),
-                "question": self.question,
-                "references": "\n".join(
-                    [f"{i['source']}: {i['content']}" for i in references]
-                ),
-            },
-            version="v2",
-        ):
-            yield event["data"]["chunk"].content
+        
+        response = chain.invoke({
+            "today": datetime.now().strftime("%Y-%m-%d"),
+            "question": self.question,
+            "references": "\n".join(
+                [f"{i['source']}: {i['content']}" for i in references]
+            ),
+        })
+        
+        return response

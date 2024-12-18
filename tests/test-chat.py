@@ -26,14 +26,8 @@ def test_chat():
             print(f"Error: {response.status_code} - {response.text}")
         else:
             print(f"Response: {response.status_code}")
-            answer = ""
-            # 스트림으로 들어오는 데이터를 처리
-            for chunk in response.iter_lines():
-                if chunk:
-                    decoded_chunk = chunk.decode("utf-8")
-                    answer += decoded_chunk
-
-        print(f"Answer: {answer}")
+            answer = response.json()
+            print(f"Answer: {answer}")
 
 if __name__ == "__main__":
     test_chat()

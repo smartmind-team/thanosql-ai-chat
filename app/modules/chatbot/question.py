@@ -30,15 +30,17 @@ class QuestionAnalyzer:
         check_general_chain = check_general_prompt | self.llm | JsonOutputParser()
         return check_general_chain.invoke({})
 
-    async def response_general_chat(self, question: str) -> str:
+    def response_general_chat(self, question: str) -> str:
         general_chat_prompt = PromptTemplate(
             template=prompt.general_chat_prompt.replace("{question}", question)
         )
         general_chat_chain = general_chat_prompt | self.llm | StrOutputParser()
+        
+        return general_chat_chain.invoke({})
 
-        async for event in general_chat_chain.astream_events({}, version="v2"):
-            if event["event"] == "on_chat_model_stream":
-                yield event["data"]["chunk"].content
+        # async for event in general_chat_chain.astream_events({}, version="v2"):
+        #     if event["event"] == "on_chat_model_stream":
+        #         yield event["data"]["chunk"].content
 
     def check_new_question(self, question: str, history_list: list = []) -> dict:
         history = "\n".join(history_list)

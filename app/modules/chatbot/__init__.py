@@ -7,6 +7,7 @@ from langchain_openai import OpenAIEmbeddings
 
 from utils import settings
 from utils.logger import logger
+from models import schema
 from modules.database import pg
 from modules.chatbot.question import QuestionAnalyzer
 from modules.chatbot.answer import AnswerGenerator
@@ -41,7 +42,7 @@ collection_dict["이지원"] = pg.load_vector(embeddings, "이지원")
 collection_dict["QC"] = pg.load_vector(embeddings, "QC")
 
 
-def chatbot(request):
+def chatbot(request: schema.chat.ChatRequest):
     try:
         logger.debug("Start chatbot process")
         question = request.messages[-1]["content"]
@@ -68,7 +69,8 @@ def chatbot(request):
         if general_chat.get("result") == "yes":
             logger.info(f"Received General Chat Request: {question}")
             response = question_analyzer.response_general_chat(question)
-            return {"response": response, "annotations": []}
+            logger.debug(f"Generated Response: {response}")
+            return {0: response, 8: []}
         logger.info(f"Received Chat Request: {question}")
 
         # 이전 대화 히스토리 확인
@@ -84,9 +86,9 @@ def chatbot(request):
         elif tags == ["이지원"]:
             result = collection_dict["이지원"].similarity_search(question, k=1)
             dict_front = {"context_easyone": result[0].metadata["image_path"]}
-            logger.info(f"dict_front: {dict_front}")
-            yield {
-                "annotations": [dict_front],
+            logger.debug(f"dict_front: {dict_front}")
+            return {
+                8: [dict_front],
                 "content": "이지원 설명입니다"
                 + '<img src="'
                 + dict_front["context_easyone"]
@@ -117,8 +119,8 @@ def chatbot(request):
 
             # insert_log()
             result = {
-                "annotations": [dict_front] if dict_front else [],
-                "content": answer,
+                8: [dict_front] if dict_front else [],
+                0: answer,
             }
             logger.debug(f"Generated Result: {result}")
 
@@ -126,4 +128,4 @@ def chatbot(request):
 
     except Exception as e:
         logger.error(f"chatbot error: {e}")
-        return {"content": "Something went wrong in chatbot\n", "annotations": []}
+        return {0: "Something went wrong in chatbot\n", 8: []}

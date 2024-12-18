@@ -19,15 +19,15 @@ class ChatRequest(BaseModel):
 
 
 class ChatSettingsResponse(BaseModel):
-    openai_model: str
-    openai_base_url: str
-    openai_api_key: str
-    text2sql_model: str
-    text2sql_base_url: str
-    text2sql_api_key: str
-    temperature: str
-    max_temperature: str
-    system_prompt: str
+    openai_model: str = ""
+    openai_base_url: str = ""
+    openai_api_key: str = ""
+    text2sql_model: str = ""
+    text2sql_base_url: str = ""
+    text2sql_api_key: str = ""
+    temperature: str = ""
+    max_temperature: str = ""
+    system_prompt: str = ""
 
 
 class ChatSettingsRequest(BaseModel):

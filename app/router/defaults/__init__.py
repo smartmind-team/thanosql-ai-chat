@@ -32,9 +32,8 @@ async def post_feedback(request: feedback.FeedbackRequest):
 
     return await process_feedback(request)
 
-
-@default_router.get("/test-chat")
-async def test_chat():
+@default_router.get("/chat")
+async def stream_chat():
     # Example chat request
     chat_request = chat.ChatRequest(
         messages=[

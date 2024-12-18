@@ -1,15 +1,20 @@
 import sys
 from pathlib import Path
+from datetime import datetime
 
 import pytest
 
-(str(Path(__file__).parents[1]))
-from utils.logger import logger
-from modules.database import Postgres
+sys.path.append(str(Path(__file__).parents[1]))
+from app.utils.logger import logger
+from app.modules.database import pg
 
 def test_database():
+    start_time = datetime.now()
     logger.debug("Testing Database")
-    assert Postgres().test_connect()
+    assert pg.test_connect()
+    end_time = datetime.now()
+    logger.debug(f"Testing Database took {end_time - start_time} seconds")
 
 if __name__ == "__main__":
-    pytest.main(["-v", __file__])
+    test_database()
+    # pytest.main(["-v", __file__])

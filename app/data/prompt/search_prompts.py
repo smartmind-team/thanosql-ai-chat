@@ -18,16 +18,16 @@ If it needs and you can find appropiate input parameters) from question, return 
 If it doesn't need or you can't find appropiate input parameters, return "No".
 <RFC info>
 <function_info>
-{rfc_info[0]}
+{rfc_info_0}
 </function_info>
 <input_info>
-{rfc_info[1]}
+{rfc_info_1}
 </input_info>
 <output_info>
-{rfc_info[2]}
+{rfc_info_2}
 </output_info>
 </RFC info>
 <question>
 {question}
 </question>
-        """
+"""

@@ -41,14 +41,17 @@ for name in class_group_list:
 collection_dict["공급규정"] = pg.load_vector(embeddings, "공급규정")
 collection_dict["이지원"] = pg.load_vector(embeddings, "이지원")
 collection_dict["QC"] = pg.load_vector(embeddings, "QC")
-
+log_msg = "Collection Dict keys:"
+for key in collection_dict.keys():
+    log_msg += f"\n   - {key}"
+logger.debug(log_msg)
 
 async def chatbot(request: schema.chat.ChatRequest):
     try:
         logger.debug("Start chatbot process")
         question = request.messages[-1]["content"]
         tags = request.tag
-        log_object = schema.chat.ChatLogSchema().model_dump(
+        log_object = schema.chat.ChatLogSchema(
             session_id=request.session_id,
             message_id=request.messages[-1]["id"],
             question=question,
@@ -104,7 +107,7 @@ async def chatbot(request: schema.chat.ChatRequest):
                     log_object.query = response
                     log_object.rdb = str(gasrate_info)
 
-            rfc_info = await data_searcher.search_rfc(question, group)
+            rfc_info = data_searcher.extract_rfc_info(group)
             for dfs in rfc_info:
                 rfc_param = data_searcher.ask_need_rfc(rfc_info=dfs, question=question)
                 yield f'0:{json.dumps("RFC 정보 추출 중입니다.")}\n'

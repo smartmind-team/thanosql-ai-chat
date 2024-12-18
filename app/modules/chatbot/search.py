@@ -86,20 +86,21 @@ class DataSearcher:
         return dfs
 
     # RFC 필요 확인
-    def ask_need_rfc(self, rfc_info, question):
+    def ask_need_rfc(self, *, rfc_info: list, question: str) -> str:
         chat_prompt = PromptTemplate(
-            template=prompt.need_rfc_prompt.format_map(
-                {
-                    "rfc_info[0]": rfc_info[0],
-                    "rfc_info[1]": rfc_info[1],
-                    "rfc_info[2]": rfc_info[2][["변수명", "설명"]],
-                    "question": question,
-                }
-            ),
+            template=prompt.need_rfc_prompt,
+            input_variables=["rfc_info_0", "rfc_info_1", "rfc_info_2", "question"],
         )
-
         chain = chat_prompt | self.llm | StrOutputParser()
-        return chain.invoke({})
+        
+        return chain.invoke(
+            {
+                "rfc_info_0": rfc_info[0],
+                "rfc_info_1": rfc_info[1],
+                "rfc_info_2": rfc_info[2][["변수명", "설명"]],
+                "question": question,
+            }
+        )
 
     # RFC 호출
     def rfc_call(self, name, input_parameters):
@@ -127,7 +128,7 @@ class DataSearcher:
         try:
             rfc_info = self.extract_rfc_info(group)
             for dfs in rfc_info:
-                rfc_param = self.ask_need_rfc(dfs, question)
+                rfc_param = self.ask_need_rfc(rfc_info=dfs, question=question)
                 if rfc_param != "No":
                     rfc_param = json.loads(
                         rfc_param[rfc_param.find("{") : rfc_param.rfind("}") + 1]

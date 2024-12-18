@@ -46,13 +46,14 @@ class Postgres:
             password=self.password,
         )
 
-    def execute(query: str):
+    def execute(self, query: str):
         if self.con is None:
             self.con = self.create_connect()
         cursor = self.con.cursor()
         try:
             cursor.execute(query)
             self.con.commit()
+            return cursor.fetchall()
         except Exception as e:
             logger.error(e)
         finally:

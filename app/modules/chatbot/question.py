@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+from typing import AsyncGenerator
 
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
@@ -30,27 +31,21 @@ class QuestionAnalyzer:
         check_general_chain = check_general_prompt | self.llm | JsonOutputParser()
         return check_general_chain.invoke({})
 
-    def response_general_chat(self, question: str) -> str:
-        general_chat_prompt = PromptTemplate(
-            template=prompt.general_chat_prompt.replace("{question}", question)
-        )
+    async def response_general_chat(self, question: str) -> AsyncGenerator[str, None]:
+        general_chat_prompt = PromptTemplate(template=prompt.general_chat_prompt)
         general_chat_chain = general_chat_prompt | self.llm | StrOutputParser()
-        
-        return general_chat_chain.invoke({})
 
-        # async for event in general_chat_chain.astream_events({}, version="v2"):
-        #     if event["event"] == "on_chat_model_stream":
-        #         yield event["data"]["chunk"].content
+        async for event in general_chat_chain.astream_events(
+            {"question": question}, version="v2"
+        ):
+            if event["event"] == "on_chat_model_stream":
+                yield await event["data"]["chunk"].content
 
     def check_new_question(self, question: str, history_list: list = []) -> dict:
         history = "\n".join(history_list)
-        check_new_prompt = PromptTemplate(
-            template=prompt.check_new_prompt.replace("{history}", history).replace(
-                "{question}", question
-            )
-        )
+        check_new_prompt = PromptTemplate(template=prompt.check_new_prompt)
         check_new_chain = check_new_prompt | self.llm | JsonOutputParser()
-        return check_new_chain.invoke({})
+        return check_new_chain.invoke({"history": history, "question": question})
 
     def classify_question(self, question, collection_dict):
         result = collection_dict["QC"].similarity_search(question, k=1)

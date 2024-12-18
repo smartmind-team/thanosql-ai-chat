@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 from datetime import datetime
+from typing import AsyncGenerator
 
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
@@ -75,16 +76,17 @@ class AnswerGenerator:
         chain = chat_prompt | self.llm | JsonOutputParser()
         return chain.invoke({"question": self.question, "response": response})
 
-    def generate_answer(self, references: list) -> str:
+    async def generate_answer(self, references: list) -> AsyncGenerator[str, None]:
         chat_prompt = PromptTemplate(template=prompt.answer_prompt)
         chain = chat_prompt | self.llm | StrOutputParser()
-        
-        response = chain.invoke({
-            "today": datetime.now().strftime("%Y-%m-%d"),
-            "question": self.question,
-            "references": "\n".join(
-                [f"{i['source']}: {i['content']}" for i in references]
-            ),
-        })
-        
-        return response
+        async for event in chain.astream_events(
+            {
+                "today": datetime.now().strftime("%Y-%m-%d"),
+                "question": self.question,
+                "references": "\n".join(
+                    [f"{i['source']}: {i['content']}" for i in references]
+                ),
+            },
+            version="v2",
+        ):
+            yield event["data"]["chunk"].content

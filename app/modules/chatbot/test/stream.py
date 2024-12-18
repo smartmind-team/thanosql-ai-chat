@@ -15,10 +15,19 @@ async def chat_stream(
 ) -> AsyncGenerator[str, None]:
     queue = asyncio.Queue()
 
-    try:
-        # chatbot 함수의 결과를 동기적으로 처리
-        for item in chatbot(chat_request):
-            yield item
+    async def producer(generator):
+        try:
+            async for item in generator:
+                await queue.put(item)
+            await queue.put(None)  # Signal completion
+        except Exception as e:
+            # If an error occurs in a task, put an error signal in the queue and stop
+            await queue.put(None)  # To stop further queue processing
+            raise e  # Re-raise the exception to be caught in the main try block
 
+    try:
+        async for item in chatbot(chat_request):
+            yield item
     except StreamTerminated:
+        logger.debug("Stream terminated")
         return

@@ -92,7 +92,7 @@ class DataSearcher:
                 {
                     "rfc_info[0]": rfc_info[0],
                     "rfc_info[1]": rfc_info[1],
-                    "rfc_info[2]": rfc_info[2][['변수명', '설명']],
+                    "rfc_info[2]": rfc_info[2][["변수명", "설명"]],
                     "question": question,
                 }
             ),
@@ -141,3 +141,34 @@ class DataSearcher:
         except Exception as e:
             logger.error(f"RFC error: {e}")
         return None
+
+    def summarize_rfc(
+        self,
+        result: str,
+        rfc_input: str,
+        input_info: str,
+        output_info: str,
+        question: str,
+    ):
+        chat_prompt = PromptTemplate(
+            template=prompt.rfc_prompt,
+            input_variables=[
+                "today",
+                "result",
+                "rfc_input",
+                "input_info",
+                "output_info",
+                "question",
+            ],
+        )
+        chain = chat_prompt | self.llm | StrOutputParser()
+        return chain.invoke(
+            {
+                "today": datetime.now().strftime("%Y-%m-%d"),
+                "result": result,
+                "rfc_input": rfc_input,
+                "input_info": input_info[["변수명", "설명"]],
+                "output_info": output_info[["변수명", "설명", "비고"]],
+                "question": question,
+            }
+        )

@@ -2,11 +2,12 @@ import inspect
 from typing import Any, Callable, Optional, Union
 
 from fastapi import HTTPException
+from fastapi.responses import JSONResponse
 
 from utils.logger import logger
 
 async def exception_handler(
-    func: Union[Callable, dict],
+    func: Union[Callable, dict, JSONResponse],
     func_params: Optional[Any] = None,
     e_code: Optional[int] = None,
     e_msg: Optional[object] = None,

@@ -147,8 +147,8 @@ class Logger:
     def handle_msg(level: int, msg: object):
         "Handle messages and return formatted message"
         caller = (
-            inspect.stack()[2].function
-            if inspect.stack()[2].function != "<module>"
+            inspect.stack()[-1].function
+            if inspect.stack()[-1].function != "<module>"
             else "main"
         )
         if level == logging.ERROR or level == logging.CRITICAL:

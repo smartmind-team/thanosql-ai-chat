@@ -36,13 +36,17 @@ async def post_feedback(request: feedback.FeedbackRequest):
 
 
 @default_router.post("/chat")
-def post_chat(request: chat.ChatRequest):
-    # def _response():
+async def post_chat(request: chat.ChatRequest):
     result = chatbot.chatbot(request)
-    return JSONResponse(content=result, media_type="application/json")
-    
+    response = JSONResponse(
+        headers={"x-vercel-ai-data-stream": "v1"},
+        content=result,
+        media_type="application/json"
+    )
+    logger.debug(f"Response: [{type(response)}] {response}")
+    return response
+
     # return router_utils.exception_handler(_response)
-    
 
     # openai_client = OpenAIClientSingleton.get_sync_client()
     # response = StreamingResponse(

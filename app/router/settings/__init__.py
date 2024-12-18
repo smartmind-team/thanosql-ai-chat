@@ -13,7 +13,6 @@ settings_router = APIRouter(
     tags=["settings"],
 )
 
-
 @settings_router.get("/")
 def get_settings():
     # Retrieve chat control settings from Redis and pack into model

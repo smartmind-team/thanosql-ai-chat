@@ -18,6 +18,8 @@ from router.settings import settings_router
 
 default_router = APIRouter()
 
+__all__ = ['default_router', 'settings_router']
+
 
 @default_router.get("/health")
 async def health_check():

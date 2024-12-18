@@ -32,20 +32,29 @@ async def post_feedback(request: feedback.FeedbackRequest):
 
     return await process_feedback(request)
 
-@default_router.get("/chat")
-async def stream_chat():
-    # Example chat request
-    chat_request = chat.ChatRequest(
-        messages=[
-            {"role": "user", "content": "Tell me a short joke about programming."},
-        ],
-        model="gpt-4o",
-    )
-
+@default_router.post("/chat")
+async def post_chat(request: chat.ChatRequest):
     openai_client = OpenAIClientSingleton.get_sync_client()
-
     response = StreamingResponse(
-        stream.chat_stream(chat_request, openai_client), media_type="text/event-stream"
+        stream.chat_stream(request, openai_client), media_type="text/event-stream"
     )
     response.headers["x-vercel-ai-data-stream"] = "v1"
     return await response
+
+# @default_router.get("/test-chat")
+# async def test_chat():
+#     # Example chat request
+#     chat_request = chat.ChatRequest(
+#         messages=[
+#             {"role": "user", "content": "Tell me a short joke about programming."},
+#         ],
+#         model="gpt-4o",
+#     )
+
+#     openai_client = OpenAIClientSingleton.get_sync_client()
+
+#     response = StreamingResponse(
+#         stream.chat_stream(chat_request, openai_client), media_type="text/event-stream"
+#     )
+#     response.headers["x-vercel-ai-data-stream"] = "v1"
+#     return await response

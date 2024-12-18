@@ -39,7 +39,7 @@ async def post_chat(request: chat.ChatRequest):
         stream.chat_stream(request, openai_client), media_type="text/event-stream"
     )
     response.headers["x-vercel-ai-data-stream"] = "v1"
-    return await response
+    return response
 
 # @default_router.get("/test-chat")
 # async def test_chat():

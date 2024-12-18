@@ -44,13 +44,18 @@ collection_dict["QC"] = pg.load_vector(embeddings, "QC")
 def chatbot(request):
     try:
         question = request.messages[-1]["content"]
-        tags = request.tag_list
+        tags = request.tag
 
         question_analyzer = QuestionAnalyzer(llm)
         data_searcher = DataSearcher(
-            llm, collection_dict, connection, table_info, file_path
+            llm=llm,
+            collection_dict=collection_dict,
+            connection=pg.vector_conn,
+            table_info=table_info,
+            file_path=FILE_PATH,
+            question=question,
         )
-        answer_generator = AnswerGenerator(llm)
+        answer_generator = AnswerGenerator(llm=llm, question=question)
 
         # 일상대화 체크
         general_chat = question_analyzer.check_general_chat(question)
@@ -105,7 +110,10 @@ def chatbot(request):
 
             # insert_log()
 
-            return {"annotations": [dict_front] if dict_front else [], "content": answer}
+            return {
+                "annotations": [dict_front] if dict_front else [],
+                "content": answer,
+            }
 
     except Exception as e:
         logger.error(f"chatbot error: {e}")

@@ -1,17 +1,11 @@
-import sys
-from pathlib import Path
-
-from typing import Literal, Optional
+from typing import Optional
 from pydantic import BaseModel
 
-from utils import settings
 from models.schema import base
-from utils.logger import logger
 
 
 class ChatRequest(BaseModel):
     messages: list[dict]
-    model: Literal[settings.app.allowed_models]
     session_id: str
     tag: str | None = None
     base_tables: list[base.Table] | None = None

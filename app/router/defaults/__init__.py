@@ -44,7 +44,7 @@ async def post_chat(request: chat.ChatRequest):
         response = JSONResponse(content=chatbot.chatbot(request), media_type="application/json")
         response.headers["x-vercel-ai-data-stream"] = "v1"
         return response
-    return router_utils.exception_handler(_response) 
+    return await router_utils.exception_handler(_response) 
 
 # @default_router.get("/test-chat")
 # async def test_chat():

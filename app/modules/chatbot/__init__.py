@@ -43,8 +43,13 @@ collection_dict["QC"] = pg.load_vector(embeddings, "QC")
 
 def chatbot(request):
     try:
+        logger.debug("Start chatbot process")
         question = request.messages[-1]["content"]
         tags = request.tag
+        log_msg = "Received Chat Request:"
+        log_msg += f"\n   - question: {question}"
+        log_msg += f"\n   - tags: {tags}"
+        logger.debug(log_msg)
 
         question_analyzer = QuestionAnalyzer(llm)
         data_searcher = DataSearcher(
@@ -56,12 +61,15 @@ def chatbot(request):
             question=question,
         )
         answer_generator = AnswerGenerator(llm=llm, question=question)
+        logger.debug("Prepared agents")
 
         # 일상대화 체크
         general_chat = question_analyzer.check_general_chat(question)
         if general_chat.get("result") == "yes":
+            logger.info(f"Received General Chat Request: {question}")
             response = question_analyzer.response_general_chat(question)
             return {"response": response, "annotations": []}
+        logger.info(f"Received Chat Request: {question}")
 
         # 이전 대화 히스토리 확인
         history_list = [
@@ -73,7 +81,6 @@ def chatbot(request):
         dict_front = None
         if not tags:
             groups = [question_analyzer.classify_question(question, collection_dict)]
-        # 이지원 태그일 때
         elif tags == ["이지원"]:
             result = collection_dict["이지원"].similarity_search(question, k=1)
             dict_front = {"context_easyone": result[0].metadata["image_path"]}
@@ -85,7 +92,6 @@ def chatbot(request):
                 + dict_front["context_easyone"]
                 + '" alt="이지원 설명입니다">',
             }
-
         else:
             groups = tags
             # 참고 자료 조회
@@ -107,13 +113,16 @@ def chatbot(request):
 
             # 답변 생성
             answer = answer_generator.generate_answer(question, raw_references)
+            logger.info(f"Generated Answer: {answer}")
 
             # insert_log()
-
-            return {
+            result = {
                 "annotations": [dict_front] if dict_front else [],
                 "content": answer,
             }
+            logger.debug(f"Generated Result: {result}")
+
+            return result
 
     except Exception as e:
         logger.error(f"chatbot error: {e}")

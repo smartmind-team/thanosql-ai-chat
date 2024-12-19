@@ -114,3 +114,13 @@ openai = OpenAISettings()
 text2sql = TEXT2SQLSettings()
 db = PostgresSettings()
 redis = RedisSettings()
+
+__all__ = [
+    "app",
+    "thanosql",
+    "fastapi",
+    "openai",
+    "text2sql",
+    "db",
+    "redis",
+]

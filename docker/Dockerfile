@@ -5,25 +5,35 @@
 
 FROM tiangolo/uvicorn-gunicorn:python3.11
 
-RUN apt-get update && apt-get install default-jdk ffmpeg libsm6 libxext6 libpq-dev gcc texlive-xetex texlive texlive-latex-extra pandoc -y
-RUN apt-get install git -y
-RUN apt-get update && apt-get install curl -y
-WORKDIR /usr/local/
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y default-jdk \
+                    ffmpeg \
+                    libsm6 \
+                    libxext6 \
+                    libpq-dev \
+                    gcc \
+                    texlive-xetex \
+                    texlive \
+                    texlive-latex-extra \
+                    pandoc \
+                    g++ \
+                    git \
+                    curl
+
+# Install SAP NW RFC SDK
 RUN mkdir /usr/local/sap
 WORKDIR /usr/local/sap
 COPY docker/nwrfc750P_14-70002752.zip ./nwrfcsdk.zip
-RUN unzip nwrfcsdk.zip
-
-RUN rm nwrfcsdk.zip
+RUN unzip nwrfcsdk.zip && rm nwrfcsdk.zip
 RUN touch /etc/ld.so.conf.d/nwrfcsdk.conf
 RUN echo "/usr/local/sap/nwrfcsdk/lib" >> /etc/ld.so.conf.d/nwrfcsdk.conf
-RUN apt-get install g++ -y
 RUN echo "/usr/local/sap/nwrfcsdk/lib" > /etc/ld.so.conf.d/sap.conf
-RUN ldconfig
 ENV SAPNWRFC_HOME="/usr/local/sap/nwrfcsdk"
+RUN ldconfig
 
+# Install python dependencies
 WORKDIR /app
-
 COPY pyproject.toml .
 COPY poetry.lock .
 RUN pip install poetry

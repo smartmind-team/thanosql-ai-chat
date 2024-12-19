@@ -1,17 +1,14 @@
-import sys
 import json
-from pathlib import Path
-from typing import Union
 from datetime import datetime
+from pathlib import Path
 
 import pandas as pd
-from pyrfc import Connection
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-
-from utils.logger import logger
 from data import prompt
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import PromptTemplate
+from langchain_openai import ChatOpenAI
+from pyrfc import Connection
+from utils import logger
 
 
 class DataSearcher:
@@ -21,7 +18,7 @@ class DataSearcher:
         collection_dict: dict,
         connection: str,
         table_info: str,
-        file_path: Union[str, Path],
+        file_path: str | Path,
         question: str,
     ):
         self.llm = llm
@@ -92,7 +89,7 @@ class DataSearcher:
             input_variables=["rfc_info_0", "rfc_info_1", "rfc_info_2", "question"],
         )
         chain = chat_prompt | self.llm | StrOutputParser()
-        
+
         return chain.invoke(
             {
                 "rfc_info_0": rfc_info[0],

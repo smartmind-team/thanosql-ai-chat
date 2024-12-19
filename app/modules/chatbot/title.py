@@ -1,11 +1,8 @@
-import sys
-import asyncio
 from typing import AsyncGenerator
-from pathlib import Path
 
-from utils import settings
-from models import schema
 from data import prompt
+from models import schema
+from utils import settings
 
 
 async def generate_chat_title(

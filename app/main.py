@@ -1,10 +1,8 @@
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-
+from fastapi.staticfiles import StaticFiles
 from router import default_router, settings_router
-from utils import settings
-from utils.logger import logger
+from utils import logger, settings
 
 app = FastAPI()
 app.add_middleware(

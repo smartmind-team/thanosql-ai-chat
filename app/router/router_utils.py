@@ -1,13 +1,12 @@
-import inspect
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional
 
 from fastapi import HTTPException
 from fastapi.responses import JSONResponse
+from utils import logger
 
-from utils.logger import logger
 
 async def exception_handler(
-    func: Union[Callable, dict, JSONResponse],
+    func: Callable | dict | JSONResponse,
     func_params: Optional[Any] = None,
     e_code: Optional[int] = None,
     e_msg: Optional[object] = None,
@@ -15,12 +14,12 @@ async def exception_handler(
 ):
     try:
         if callable(func) and func_params:
-            if hasattr(func, "__await__"): # if func is async
+            if hasattr(func, "__await__"):  # if func is async
                 result = await func(func_params)
             else:
                 result = func(func_params)
         elif callable(func):
-            if hasattr(func, "__await__"): # if func is async
+            if hasattr(func, "__await__"):  # if func is async
                 result = await func()
             else:
                 result = func()

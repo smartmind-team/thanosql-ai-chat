@@ -257,5 +257,6 @@ pyrightconfig.json
 
 # docker
 docker/grafana/data/*
+docker/prometheus/data/*
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,linux,visualstudiocode,python

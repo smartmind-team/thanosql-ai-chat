@@ -1,14 +1,12 @@
-import sys
 import asyncio
-from pathlib import Path
 from typing import AsyncGenerator
 
-from openai import OpenAI
-
-from utils.logger import logger
 from models import schema
 from models.exception import StreamTerminated
 from modules.chatbot import chatbot
+from openai import OpenAI
+from utils import logger
+
 
 async def chat_stream(
     chat_request: schema.chat.ChatRequest, openai_client: OpenAI

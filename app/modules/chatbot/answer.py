@@ -1,14 +1,10 @@
-import sys
-from pathlib import Path
 from datetime import datetime
 from typing import AsyncGenerator
 
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
-
-from utils.logger import logger
 from data import prompt
+from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
+from langchain_core.prompts import PromptTemplate
+from langchain_openai import ChatOpenAI
 
 
 class AnswerGenerator:

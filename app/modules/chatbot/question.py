@@ -1,14 +1,10 @@
-import sys
-from pathlib import Path
 from typing import AsyncGenerator
 
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
-
-from utils.logger import logger
-from utils import settings
 from data import prompt
+from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
+from langchain_core.prompts import PromptTemplate
+from langchain_openai import ChatOpenAI
+from utils import settings
 
 
 class QuestionAnalyzer:

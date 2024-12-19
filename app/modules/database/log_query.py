@@ -1,10 +1,5 @@
 "This script was created for backuping query log"
-import sys
-from pathlib import Path
-
-(str(Path(__file__).parents[3]))
 from models import schema
-
 
 create_log_query = """
 CREATE TABLE samchully_log(
@@ -27,41 +22,41 @@ CREATE TABLE samchully_log(
 );
 """
 
-insert_log_query = f"""
-            INSERT INTO samchully_log (
-                session_id,
-                message_id,
-                question,
-                tag,
-                query,
-                rdb,
-                rag,
-                rfc,
-                response,
-                history,
-                validate_intention,
-                validate_additional,
-                validate_tag,
-                validate_rdb,
-                validate_rag,
-                validate_rfc
-            )
-            VALUES (
-                '{schema.chat.ChatLogSchema.session_id}',
-                '{schema.chat.ChatLogSchema.message_id}',
-                '{schema.chat.ChatLogSchema.question}',
-                '{schema.chat.ChatLogSchema.tag}',
-                {null_check(schema.chat.ChatLogSchema.query)},
-                {null_check(schema.chat.ChatLogSchema.rdb)},
-                ARRAY{schema.chat.ChatLogSchema.rag},
-                {null_check(schema.chat.ChatLogSchema.rfc)},
-                '{schema.chat.ChatLogSchema.response}',
-                ARRAY{schema.chat.ChatLogSchema.history},
-                '{schema.chat.ChatLogSchema.validate_intention}',
-                '{schema.chat.ChatLogSchema.validate_additional}',
-                '{schema.chat.ChatLogSchema.validate_tag}',
-                {schema.chat.ChatLogSchema.validate_rdb},
-                {schema.chat.ChatLogSchema.validate_rag},
-                {schema.chat.ChatLogSchema.validate_rfc}
-            );
-        """
+# insert_log_query = f"""
+#             INSERT INTO samchully_log (
+#                 session_id,
+#                 message_id,
+#                 question,
+#                 tag,
+#                 query,
+#                 rdb,
+#                 rag,
+#                 rfc,
+#                 response,
+#                 history,
+#                 validate_intention,
+#                 validate_additional,
+#                 validate_tag,
+#                 validate_rdb,
+#                 validate_rag,
+#                 validate_rfc
+#             )
+#             VALUES (
+#                 '{schema.chat.ChatLogSchema.session_id}',
+#                 '{schema.chat.ChatLogSchema.message_id}',
+#                 '{schema.chat.ChatLogSchema.question}',
+#                 '{schema.chat.ChatLogSchema.tag}',
+#                 {null_check(schema.chat.ChatLogSchema.query)},
+#                 {null_check(schema.chat.ChatLogSchema.rdb)},
+#                 ARRAY{schema.chat.ChatLogSchema.rag},
+#                 {null_check(schema.chat.ChatLogSchema.rfc)},
+#                 '{schema.chat.ChatLogSchema.response}',
+#                 ARRAY{schema.chat.ChatLogSchema.history},
+#                 '{schema.chat.ChatLogSchema.validate_intention}',
+#                 '{schema.chat.ChatLogSchema.validate_additional}',
+#                 '{schema.chat.ChatLogSchema.validate_tag}',
+#                 {schema.chat.ChatLogSchema.validate_rdb},
+#                 {schema.chat.ChatLogSchema.validate_rag},
+#                 {schema.chat.ChatLogSchema.validate_rfc}
+#             );
+#         """

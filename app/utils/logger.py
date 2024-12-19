@@ -1,8 +1,7 @@
-import sys
 import inspect
 import logging
+import sys
 import traceback
-from typing import Union
 
 
 class DuplicateFilter(logging.Filter):
@@ -29,13 +28,13 @@ class Logger:
     This class is a wrapper around the logging module.
 
     :param name: str: Name of the logger
-    :param level: Union[str, int]: Logging level (default: logging.DEBUG)
+    :param level: str | int: Logging level (default: logging.DEBUG)
     """
 
     def __init__(
         self,
         name: str,
-        level: Union[str, int] = logging.DEBUG,
+        level: str | int = logging.DEBUG,
     ):
         self.logger = logging.getLogger(name)
         self.logger.setLevel(self._get_level(level))
@@ -47,7 +46,7 @@ class Logger:
         self.logger.addHandler(self.console_handler)
         self.logger.addFilter(DuplicateFilter())
 
-    def _get_level(self, lv: Union[int, str]):
+    def _get_level(self, lv: int | str):
         if isinstance(lv, str):
             lv = lv.upper()
         if lv == "DEBUG":
@@ -64,7 +63,7 @@ class Logger:
             return logging.DEBUG
 
     @staticmethod
-    def _get_emoji(level: Union[int, str]):
+    def _get_emoji(level: int | str):
         if level == logging.DEBUG or level == "DEBUG":
             return "🛠️"
         elif level == logging.INFO or level == "INFO":

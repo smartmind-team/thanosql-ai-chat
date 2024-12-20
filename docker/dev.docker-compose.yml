@@ -10,6 +10,7 @@ services:
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - ../app:/app
+      - ../pyproject.toml:/pyproject.toml
     ports:
       - "8826:8000"
     healthcheck:

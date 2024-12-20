@@ -19,15 +19,13 @@ async def health_check():
 
 @default_router.get("/functions")
 async def get_functions():
-    async def _get_func():
-        return json.loads(settings.redis.get("functions"))
-
-    return await router_utils.exception_handler(_get_func)
+    return await router_utils.exception_handler(
+        json.loads(settings.redis.get("functions"))
+    )
 
 
 @default_router.post("/feedback")
 async def post_feedback(request: feedback.FeedbackRequest):
-
     return await process_feedback(request)
 
 
